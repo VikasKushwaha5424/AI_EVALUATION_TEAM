@@ -14,39 +14,116 @@
 
         <ul class="nav nav-tabs mb-4" id="evaluatorTabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link {% if active_tab != 'bulk' %}active{% endif %}" id="single-tab" data-bs-toggle="tab" data-bs-target="#single" type="button" role="tab">Single Student</button>
+                <button class="nav-link {% if active_tab != 'bulk' and active_tab != 'exam' %}active{% endif %}" id="single-tab" data-bs-toggle="tab" data-bs-target="#single" type="button" role="tab">Single Student (Hybrid)</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link {% if active_tab == 'bulk' %}active{% endif %}" id="bulk-tab" data-bs-toggle="tab" data-bs-target="#bulk" type="button" role="tab">Bulk CSV Upload (Tier 2)</button>
+                <button class="nav-link {% if active_tab == 'bulk' %}active{% endif %}" id="bulk-tab" data-bs-toggle="tab" data-bs-target="#bulk" type="button" role="tab">Bulk CSV Upload</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link {% if active_tab == 'exam' %}active{% endif %}" id="exam-tab" data-bs-toggle="tab" data-bs-target="#exam" type="button" role="tab">Full Exam (Word/PDF)</button>
             </li>
         </ul>
 
         <div class="tab-content" id="myTabContent">
             
-            <div class="tab-pane fade {% if active_tab != 'bulk' %}show active{% endif %}" id="single" role="tabpanel">
+            <div class="tab-pane fade {% if active_tab != 'bulk' and active_tab != 'exam' %}show active{% endif %}" id="single" role="tabpanel">
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="card shadow-sm mb-4">
+                        <div class="card shadow-sm mb-4 border-dark">
+                            <div class="card-header bg-dark text-white fw-bold">Hybrid Rubric Builder</div>
                             <div class="card-body">
                                 <form method="POST" action="/">
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">Teacher's Model Answer</label>
-                                        <textarea class="form-control" name="teacher_answer" rows="3" required></textarea>
+                                        <textarea class="form-control" name="teacher_answer" rows="2" required></textarea>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">Key Concepts (comma-separated)</label>
                                         <input type="text" class="form-control" name="concepts" placeholder="e.g. photosynthesis, sunlight, water">
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">Total Marks</label>
-                                        <input type="number" class="form-control" name="total_marks" value="5" min="1" required>
+                                    
+                                    <div class="alert alert-primary p-2 mb-3">
+                                        <label class="form-label fw-bold mb-0">AI Allocated Marks (Text & Meaning)</label>
+                                        <input type="number" class="form-control mt-1" name="ai_marks" value="5" min="1" step="0.5" required>
                                     </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold text-secondary">Advanced Subjective Parameters</label>
+                                        <p class="text-muted" style="font-size: 0.85em;">Select parameters the local AI cannot grade to reserve them for manual review.</p>
+                                        
+                                        <div class="accordion accordion-flush border" id="rubricAccordion">
+                                            
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header">
+                                                    <button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse" data-bs-target="#cat1">
+                                                        <strong>1. Conceptual & Reasoning</strong>
+                                                    </button>
+                                                </h2>
+                                                <div id="cat1" class="accordion-collapse collapse bg-light" data-bs-parent="#rubricAccordion">
+                                                    <div class="accordion-body py-2">
+                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p1" value="Conceptual Accuracy"> <small>Conceptual Accuracy (No wrong facts)</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p1" placeholder="Marks" step="0.5"></div></div>
+                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p3" value="Depth of Explanation"> <small>Depth of Explanation</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p3" placeholder="Marks" step="0.5"></div></div>
+                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p5" value="Critical Understanding"> <small>Critical Understanding (Explains 'Why')</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p5" placeholder="Marks" step="0.5"></div></div>
+                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p6" value="Concept Linking"> <small>Concept Linking (Connections)</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p6" placeholder="Marks" step="0.5"></div></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header">
+                                                    <button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse" data-bs-target="#cat2">
+                                                        <strong>2. Content & Examples</strong>
+                                                    </button>
+                                                </h2>
+                                                <div id="cat2" class="accordion-collapse collapse bg-light" data-bs-parent="#rubricAccordion">
+                                                    <div class="accordion-body py-2">
+                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p8" value="Information Density"> <small>Information Density</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p8" placeholder="Marks" step="0.5"></div></div>
+                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p10" value="Examples and Applications"> <small>Examples & Applications</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p10" placeholder="Marks" step="0.5"></div></div>
+                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p11" value="Step-by-Step Explanation"> <small>Step-by-Step Explanation</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p11" placeholder="Marks" step="0.5"></div></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header">
+                                                    <button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse" data-bs-target="#cat3">
+                                                        <strong>3. Writing Quality & Tone</strong>
+                                                    </button>
+                                                </h2>
+                                                <div id="cat3" class="accordion-collapse collapse bg-light" data-bs-parent="#rubricAccordion">
+                                                    <div class="accordion-body py-2">
+                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p13" value="Clarity of Explanation"> <small>Clarity of Explanation</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p13" placeholder="Marks" step="0.5"></div></div>
+                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p15" value="Academic Tone"> <small>Academic Tone</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p15" placeholder="Marks" step="0.5"></div></div>
+                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p34" value="Originality / Personal Style"> <small>Originality / Personal Style</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p34" placeholder="Marks" step="0.5"></div></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header">
+                                                    <button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse" data-bs-target="#cat4">
+                                                        <strong>4. Structure & Visuals</strong>
+                                                    </button>
+                                                </h2>
+                                                <div id="cat4" class="accordion-collapse collapse bg-light" data-bs-parent="#rubricAccordion">
+                                                    <div class="accordion-body py-2">
+                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p18" value="Logical Flow of Ideas"> <small>Logical Flow of Ideas</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p18" placeholder="Marks" step="0.5"></div></div>
+                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p19" value="Structure and Organization"> <small>Structure & Organization</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p19" placeholder="Marks" step="0.5"></div></div>
+                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p23" value="Diagrams & Visual Quality"> <small>Diagrams & Visual Quality</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p23" placeholder="Marks" step="0.5"></div></div>
+                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p29" value="Handwriting Suitability"> <small>Handwriting Suitability</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p29" placeholder="Marks" step="0.5"></div></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
                                     <hr>
                                     <div class="mb-3">
                                         <label class="form-label fw-bold text-primary">Student's Answer</label>
                                         <textarea class="form-control" name="student_answer" rows="3" required></textarea>
                                     </div>
-                                    <button type="submit" class="btn btn-primary w-100">Evaluate Answer</button>
+                                    <button type="submit" class="btn btn-primary w-100 fw-bold">Evaluate Hybrid Answer</button>
                                 </form>
                             </div>
                         </div>
@@ -54,45 +131,53 @@
 
                     <div class="col-md-6">
                         {% if results %}
-                        <div class="card shadow-sm border-success">
+                        <div class="card shadow-sm border-success mb-3">
                             <div class="card-header bg-success text-white fw-bold">Evaluation Results</div>
                             <div class="card-body">
-                                <h4 class="text-center text-success mb-3">Marks Awarded: {{ "%.1f"|format(results.awarded_marks) }} / {{ results.total_marks }}</h4>
-                                <p><strong>Semantic Match:</strong> {{ results.semantic_similarity }}%</p>
                                 
-                                <p class="mb-1"><strong>Concepts Found ({{ results.concept_score }}%):</strong></p>
-                                <ul class="text-success">
-                                    {% for concept in results.concepts_found %}
-                                        <li>{{ concept }}</li>
-                                    {% else %}
-                                        <li>None found.</li>
-                                    {% endfor %}
-                                </ul>
-
-                                {% if results.missing_concepts %}
-                                <p class="mb-1"><strong>Missing Concepts:</strong></p>
-                                <ul class="text-danger">
-                                    {% for missing in results.missing_concepts %}
-                                        <li>{{ missing }}</li>
-                                    {% endfor %}
-                                </ul>
+                                <h5 class="text-success border-bottom pb-2">🤖 AI Score: {{ "%.1f"|format(results.ai_eval.awarded_marks) }} / {{ results.ai_eval.total_marks }}</h5>
+                                <p class="mb-1" style="font-size: 0.9em;"><strong>Semantic Match:</strong> {{ results.ai_eval.semantic_similarity }}%</p>
+                                <p class="mb-1" style="font-size: 0.9em;"><strong>Concepts Found:</strong> {{ results.ai_eval.concepts_found | join(", ") if results.ai_eval.concepts_found else "None" }}</p>
+                                
+                                {% if results.ai_eval.missing_concepts %}
+                                    <p class="mb-1 text-danger" style="font-size: 0.9em;"><strong>Missing:</strong> {{ results.ai_eval.missing_concepts | join(", ") }}</p>
                                 {% endif %}
 
-                                {% if results.irrelevant_sentences %}
+                                {% if results.ai_eval.irrelevant_sentences %}
                                 <div class="alert alert-warning mt-3 p-2">
-                                    <strong>⚠️ Irrelevant Sentences Detected:</strong>
-                                    <ul class="mb-0 mt-1" style="font-size: 0.9em;">
-                                        {% for fluff in results.irrelevant_sentences %}
+                                    <strong>⚠️ Fluff Detected:</strong>
+                                    <ul class="mb-0 mt-1" style="font-size: 0.85em;">
+                                        {% for fluff in results.ai_eval.irrelevant_sentences %}
                                             <li>"{{ fluff }}"</li>
                                         {% endfor %}
                                     </ul>
                                 </div>
                                 {% endif %}
+
+                                {% if results.manual_params %}
+                                <h5 class="text-warning border-bottom pb-2 mt-4">👨‍🏫 Pending Manual Review</h5>
+                                <ul class="list-group mb-3">
+                                    {% for param, mark in results.manual_params.items() %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center py-1">
+                                        {{ param }}
+                                        <span class="badge bg-warning text-dark rounded-pill">Out of {{ mark }} marks</span>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                                {% endif %}
+
+                                <div class="alert alert-dark mt-4 text-center">
+                                    <h6 class="mb-0">Maximum Possible Score: <strong>{{ results.grand_total_marks }}</strong></h6>
+                                    <small>(AI Marks + Manual Marks)</small>
+                                </div>
+
                             </div>
                         </div>
                         {% else %}
-                        <div class="card shadow-sm">
-                            <div class="card-body text-center text-muted"><p class="mt-3">Submit an answer to see results.</p></div>
+                        <div class="card shadow-sm border-secondary dashed">
+                            <div class="card-body text-center text-muted">
+                                <p class="mt-4 mb-4">Set your rubric and submit an answer to see the hybrid evaluation.</p>
+                            </div>
                         </div>
                         {% endif %}
                     </div>
@@ -100,7 +185,6 @@
             </div>
 
             <div class="tab-pane fade {% if active_tab == 'bulk' %}show active{% endif %}" id="bulk" role="tabpanel">
-                
                 {% if bulk_results %}
                 <div class="card shadow-sm border-primary mb-4">
                     <div class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center">
@@ -133,7 +217,6 @@
                                 {% endif %}
                             </div>
                         </div>
-
                         <div class="text-center mt-4">
                             <a href="/" class="btn btn-outline-secondary">Grade Another CSV</a>
                         </div>
@@ -141,14 +224,11 @@
                 </div>
 
                 <script>
-                    // Pass Python variables into JavaScript
                     const distLabels = {{ bulk_results.dist_labels | tojson }};
                     const distData = {{ bulk_results.dist_data | tojson }};
-                    
                     const conceptLabels = {{ bulk_results.concept_labels | tojson }};
                     const conceptData = {{ bulk_results.concept_data | tojson }};
 
-                    // Draw Grade Distribution (Bar Chart)
                     new Chart(document.getElementById('distChart'), {
                         type: 'bar',
                         data: {
@@ -164,7 +244,6 @@
                         options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
                     });
 
-                    // Draw Most Missed Concepts (Horizontal Bar Chart)
                     if (conceptLabels.length > 0) {
                         new Chart(document.getElementById('conceptChart'), {
                             type: 'bar',
@@ -213,8 +292,89 @@
                     </div>
                 </div>
                 {% endif %}
-
             </div>
+
+            <div class="tab-pane fade {% if active_tab == 'exam' %}show active{% endif %}" id="exam" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title text-warning fw-bold">Multi-Question Exam Grader</h5>
+                                <p class="text-muted">Upload Word (.docx) or PDF files formatted with <code>[Q1]</code>, <code>[Q2]</code> tags.</p>
+                                
+                                <form method="POST" action="/exam" enctype="multipart/form-data">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-bold text-success">1. Teacher's Master Key</label>
+                                            <input type="file" class="form-control" name="teacher_doc" accept=".docx,.pdf" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-bold text-primary">2. Student's Submission</label>
+                                            <input type="file" class="form-control" name="student_doc" accept=".docx,.pdf" required>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-warning text-dark fw-bold w-100 mt-2">Parse and Grade Exam</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        {% if exam_report %}
+                        <div class="card shadow-sm border-warning mb-4">
+                            <div class="card-header bg-warning text-dark fw-bold">Final Exam Report</div>
+                            <div class="card-body">
+                                <div class="text-center mb-4">
+                                    <h5 class="text-muted">Final Exam Score</h5>
+                                    <h1 class="text-dark fw-bold display-4">{{ exam_report.total_awarded }} <span class="text-muted fs-4">/ {{ exam_report.total_possible }}</span></h1>
+                                    <h4 class="{% if exam_report.percentage >= 80 %}text-success{% elif exam_report.percentage >= 60 %}text-warning{% else %}text-danger{% endif %} fw-bold">
+                                        {{ exam_report.percentage }}%
+                                    </h4>
+                                </div>
+                                
+                                <hr>
+                                <h5 class="mb-3">Question Breakdown:</h5>
+                                
+                                <div class="accordion" id="examAccordion">
+                                    {% for q in exam_report.question_breakdown %}
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="heading{{ loop.index }}">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}">
+                                                <strong>{{ q.question_id }}</strong> &nbsp;- Score: <span class="text-success ms-2 fw-bold">{{ q.awarded_marks }} / {{ q.total_marks }}</span>
+                                            </button>
+                                        </h2>
+                                        <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#examAccordion">
+                                            <div class="accordion-body">
+                                                <p><strong>Student Wrote:</strong> <br><span class="text-muted">{{ q.student_answer if q.student_answer else "No answer provided." }}</span></p>
+                                                
+                                                <div class="d-flex justify-content-between align-items-center mt-3 p-2 bg-light rounded">
+                                                    <span><strong>Meaning Match:</strong> {{ q.semantic_similarity }}%</span>
+                                                    <span>
+                                                        <strong>Concepts Missing:</strong> 
+                                                        {% if q.missing_concepts %}
+                                                            <span class="text-danger">{{ q.missing_concepts | join(", ") }}</span>
+                                                        {% else %}
+                                                            <span class="text-success">None</span>
+                                                        {% endif %}
+                                                    </span>
+                                                </div>
+
+                                                {% if q.irrelevant_sentences %}
+                                                <div class="text-danger mt-2" style="font-size: 0.85em;">
+                                                    <strong>Fluff Penalty Applied:</strong> Found {{ q.irrelevant_sentences|length }} off-topic sentence(s).
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </body>

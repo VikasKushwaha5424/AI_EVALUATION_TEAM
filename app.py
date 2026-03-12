@@ -2,26 +2,59 @@ from flask import Flask, render_template, request, send_file
 from nlp_engine import evaluate_answer
 import pandas as pd
 import os
+import tempfile
 from collections import Counter
+
+# --- IMPORT THE TIER 3 PARSER ---
+from document_parser import extract_text_from_file, parse_teacher_key, parse_student_exam
 
 app = Flask(__name__)
 
+# --- TIER 1: HYBRID SINGLE STUDENT GRADING ---
 @app.route("/", methods=["GET", "POST"])
 def home():
     results = None
     if request.method == "POST":
         teacher_ans = request.form.get("teacher_answer")
         student_ans = request.form.get("student_answer")
-        total_marks = float(request.form.get("total_marks"))
+        
+        # 1. Get AI allocated marks
+        ai_marks = float(request.form.get("ai_marks", 5))
+        
+        # 2. DYNAMICALLY catch all manual parameters selected by the teacher
+        manual_params = {}
+        for key, value in request.form.items():
+            # If the input is a checkbox...
+            if key.startswith("check_"):
+                # Find its matching number input (e.g., check_p1 matches mark_p1)
+                mark_key = key.replace("check_", "mark_")
+                mark_val = request.form.get(mark_key)
+                
+                # If the teacher typed a number in the box, save it
+                if mark_val and float(mark_val) > 0:
+                    param_name = value # The value of the checkbox is the parameter name
+                    manual_params[param_name] = float(mark_val)
+                    
+        total_manual_marks = sum(manual_params.values())
+        grand_total_marks = ai_marks + total_manual_marks
         
         raw_concepts = request.form.get("concepts", "")
         concepts = [c.strip() for c in raw_concepts.split(",") if c.strip()]
         
-        results = evaluate_answer(teacher_ans, student_ans, concepts, total_marks)
+        # 3. Run the AI Engine ONLY on the AI allocated marks
+        ai_results = evaluate_answer(teacher_ans, student_ans, concepts, ai_marks)
+        
+        # 4. Package everything together for the frontend
+        results = {
+            "ai_eval": ai_results,
+            "manual_params": manual_params,
+            "total_manual_marks": total_manual_marks,
+            "grand_total_marks": grand_total_marks
+        }
         
     return render_template("index.html", results=results, active_tab='single')
 
-# --- TIER 2 & ANALYTICS: BULK CSV GRADING ---
+# --- TIER 2: BULK CSV GRADING & DASHBOARD ---
 @app.route("/bulk", methods=["POST"])
 def bulk_grade():
     file = request.files.get("csv_file")
@@ -35,18 +68,15 @@ def bulk_grade():
         return "No file uploaded!", 400
 
     df = pd.read_csv(file)
-    
     awarded_marks_list = []
     feedback_list = []
-    all_missing_concepts = [] # Track missed concepts for the whole class
+    all_missing_concepts = [] 
     
     for index, row in df.iterrows():
         student_ans = str(row.get('Student_Answer', ''))
-        
         res = evaluate_answer(teacher_ans, student_ans, concepts, total_marks)
-        awarded_marks_list.append(res['awarded_marks'])
         
-        # Add to our global list of missing concepts for the analytics chart
+        awarded_marks_list.append(res['awarded_marks'])
         all_missing_concepts.extend(res['missing_concepts'])
         
         feedback = f"Match: {res['semantic_similarity']}%. "
@@ -63,15 +93,12 @@ def bulk_grade():
     df['Awarded_Marks'] = awarded_marks_list
     df['AI_Feedback'] = feedback_list
 
-    # Save to a local file in your project folder so the teacher can download it later
     output_path = "graded_results.csv"
     df.to_csv(output_path, index=False)
 
-    # --- CALCULATE ANALYTICS FOR CHART.JS ---
     total_students = len(df)
     avg_score = round(sum(awarded_marks_list) / total_students, 1) if total_students > 0 else 0
     
-    # 1. Calculate Grade Distribution (0-20%, 20-40%, etc.)
     dist = {"0-20%": 0, "21-40%": 0, "41-60%": 0, "61-80%": 0, "81-100%": 0}
     for mark in awarded_marks_list:
         p = (mark / total_marks) * 100
@@ -81,10 +108,8 @@ def bulk_grade():
         elif p <= 80: dist["61-80%"] += 1
         else: dist["81-100%"] += 1
 
-    # 2. Calculate Most Missed Concepts
     concept_counts = Counter(all_missing_concepts)
     
-    # Package everything up to send to the HTML page
     bulk_results = {
         "total_students": total_students,
         "average_score": avg_score,
@@ -95,10 +120,69 @@ def bulk_grade():
         "concept_data": list(concept_counts.values())
     }
 
-    # Tell the HTML to load the bulk tab automatically
     return render_template("index.html", bulk_results=bulk_results, active_tab='bulk')
 
-# --- ROUTE TO DOWNLOAD THE CSV AFTER VIEWING THE DASHBOARD ---
+# --- TIER 3: FULL EXAM DOCUMENT GRADING ---
+@app.route("/exam", methods=["POST"])
+def grade_exam():
+    teacher_file = request.files.get("teacher_doc")
+    student_file = request.files.get("student_doc")
+
+    if not teacher_file or not student_file:
+        return "Missing files!", 400
+
+    # Save uploaded files temporarily so Python can read them
+    temp_dir = tempfile.gettempdir()
+    teacher_path = os.path.join(temp_dir, teacher_file.filename)
+    student_path = os.path.join(temp_dir, student_file.filename)
+    
+    teacher_file.save(teacher_path)
+    student_file.save(student_path)
+
+    # Extract raw text and parse into dictionaries
+    teacher_text = extract_text_from_file(teacher_path, teacher_file.filename)
+    student_text = extract_text_from_file(student_path, student_file.filename)
+
+    teacher_data = parse_teacher_key(teacher_text)
+    student_data = parse_student_exam(student_text)
+
+    # Clean up the temporary files
+    os.remove(teacher_path)
+    os.remove(student_path)
+
+    # Grade the exam question by question
+    exam_results = []
+    total_exam_marks = 0
+    total_awarded_marks = 0
+
+    for q_id, t_info in teacher_data.items():
+        s_ans = student_data.get(q_id, "") 
+        
+        res = evaluate_answer(
+            t_info['answer'], 
+            s_ans, 
+            t_info['concepts'], 
+            t_info['marks']
+        )
+        
+        total_exam_marks += t_info['marks']
+        total_awarded_marks += res['awarded_marks']
+
+        res['question_id'] = q_id
+        res['student_answer'] = s_ans
+        exam_results.append(res)
+
+    # Package the final report for the UI
+    final_report = {
+        "total_awarded": round(total_awarded_marks, 1),
+        "total_possible": total_exam_marks,
+        "percentage": round((total_awarded_marks / total_exam_marks) * 100, 1) if total_exam_marks > 0 else 0,
+        "question_breakdown": exam_results
+    }
+
+    return render_template("index.html", exam_report=final_report, active_tab='exam')
+
+# --- DOWNLOAD ROUTE ---
 @app.route("/download")
 def download_csv():
     return send_file("graded_results.csv", as_attachment=True, download_name="Graded_Class_Results.csv")

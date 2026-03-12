@@ -4,16 +4,45 @@ from sklearn.metrics.pairwise import cosine_similarity
 from spellchecker import SpellChecker
 import nltk
 from nltk.corpus import wordnet
+import sys
+import time
+import threading
+import itertools
+
+# --- 1. SET UP THE LOADING ANIMATION ---
+def animate_loading(message):
+    spinner = itertools.cycle(['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'])
+    global stop_spinner
+    stop_spinner = False
+    while not stop_spinner:
+        sys.stdout.write(f'\r\033[96m{message} {next(spinner)}\033[0m')
+        sys.stdout.flush()
+        time.sleep(0.1)
+    # Clear the line when done
+    sys.stdout.write('\r' + ' ' * (len(message) + 2) + '\r')
 
 nltk.download('wordnet', quiet=True)
 nltk.download('omw-1.4', quiet=True)
 
-print("Loading AI Models...")
+# Start the spinner animation in the background
+print("\n" + "="*50)
+t = threading.Thread(target=animate_loading, args=("Booting up AI Models into RAM (This takes about a minute)...",))
+t.start()
+
+# --- 2. LOAD THE MODELS (This is the slow part) ---
 nlp = spacy.load("en_core_web_sm")
 model = SentenceTransformer('all-MiniLM-L6-v2')
 spell = SpellChecker()
-print("Models loaded successfully!\n")
 
+# Stop the spinner
+stop_spinner = True
+t.join()
+
+print("\033[92m✅ All AI Models loaded successfully!\033[0m")
+print("="*50 + "\n")
+
+
+# --- 3. YOUR EXISTING FUNCTIONS ---
 def get_synonyms(word):
     synonyms = set()
     word_formatted = word.replace(' ', '_') 
@@ -29,17 +58,15 @@ def evaluate_answer(teacher_answer, student_answer, key_concepts, total_marks):
     semantic_score = similarity_matrix[0][0] 
     
     # --- 2. ADVANCED: SENTENCE-LEVEL FLUFF DETECTION ---
-    student_doc = nlp(student_answer) # Original capitalization for sentence boundaries
+    student_doc = nlp(student_answer) 
     irrelevant_sentences = []
     
     for sent in student_doc.sents:
         sent_text = sent.text.strip()
-        if len(sent_text) > 5: # Ignore tiny fragments
-            # Compare this specific sentence to the teacher's whole answer
+        if len(sent_text) > 5: 
             sent_emb = model.encode([sent_text])
             sim = cosine_similarity([embeddings[0]], [sent_emb[0]])[0][0]
             
-            # If the math shows it's completely unrelated to the topic, flag it!
             if sim < 0.25: 
                 irrelevant_sentences.append(sent_text)
                 
@@ -56,7 +83,7 @@ def evaluate_answer(teacher_answer, student_answer, key_concepts, total_marks):
     student_text_corrected = " ".join(corrected_words)
     
     concepts_found = []
-    base_concepts_found = [] # Keep track of exact original words found
+    base_concepts_found = [] 
     
     for concept in key_concepts:
         concept_lower = concept.lower()
@@ -89,7 +116,6 @@ def evaluate_answer(teacher_answer, student_answer, key_concepts, total_marks):
     # --- 5. FINAL CALCULATION ---
     final_score_percentage = (semantic_score * 0.6) + (concept_score * 0.4)
     
-    # Penalize slightly for irrelevant fluff (e.g., minus 5% per fluff sentence)
     fluff_penalty = len(irrelevant_sentences) * 0.05
     final_score_percentage = max(0, final_score_percentage - fluff_penalty)
     
