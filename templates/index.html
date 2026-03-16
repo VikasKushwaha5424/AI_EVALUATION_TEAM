@@ -7,382 +7,521 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* ==========================================
+           🎨 COLOR THEORY & THEMING (Batch 3 & Neutrals)
+           ========================================== */
+        :root {
+            /* Neutrals */
+            --pure-white: #FFFFFF;
+            --off-white: #F7F9F8;
+            --light-gray: #E5E7EB;
+            --text-dark: #2A2A35;
+            --text-muted: #6B7280;
+
+            /* Analogous Backgrounds */
+            --soft-blue: #B9CEFF;
+            --soft-purple: #C7B9FF;
+            --soft-pink: #EAB9FF;
+
+            /* Split Complementary / Triadic Accents */
+            --soft-yellow: #FFEAB9;
+            --soft-green: #CEFFB9;
+            --soft-coral: #FFC7B9;
+            --soft-mint: #B9FFC7;
+        }
+
+        body {
+            background-color: var(--off-white);
+            color: var(--text-dark);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        /* Hero Header with Analogous Gradient */
+        .hero-section {
+            background: linear-gradient(135deg, var(--soft-blue) 0%, var(--soft-purple) 100%);
+            padding: 80px 20px 60px;
+            border-bottom-left-radius: 40px;
+            border-bottom-right-radius: 40px;
+            box-shadow: 0 10px 30px rgba(185, 206, 255, 0.4);
+            margin-bottom: 50px;
+            text-align: center;
+        }
+
+        .hero-title {
+            font-weight: 800;
+            font-size: 3rem;
+            color: var(--text-dark);
+            letter-spacing: -1px;
+        }
+
+        /* Pure White UI Cards */
+        .glass-card {
+            background: var(--pure-white);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            margin-bottom: 60px;
+            transition: transform 0.3s ease;
+        }
+        .glass-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .section-title {
+            font-weight: 800;
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .section-number {
+            background: var(--soft-purple);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        /* Inputs & Forms */
+        .form-control {
+            background-color: var(--off-white);
+            border: 2px solid transparent;
+            border-radius: 15px;
+            padding: 15px 20px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        .form-control:focus {
+            background-color: var(--pure-white);
+            border-color: var(--soft-purple);
+            box-shadow: 0 0 0 4px rgba(199, 185, 255, 0.3);
+        }
+        .form-label {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            margin-top: 15px;
+        }
+
+        /* Split Complementary Buttons */
+        .btn-primary-custom {
+            background-color: var(--soft-yellow);
+            color: #5A4A1E; /* Dark complementary text */
+            font-weight: 700;
+            padding: 15px 30px;
+            border-radius: 15px;
+            border: none;
+            transition: all 0.2s;
+            font-size: 1.1rem;
+        }
+        .btn-primary-custom:hover {
+            background-color: #ffe090;
+            transform: scale(1.02);
+            color: #5A4A1E;
+        }
+        
+        .btn-secondary-custom {
+            background-color: var(--soft-coral);
+            color: #6A3A2E;
+            font-weight: 700;
+            padding: 12px 25px;
+            border-radius: 12px;
+            border: none;
+            transition: all 0.2s;
+        }
+        .btn-secondary-custom:hover {
+            background-color: #ffb19e;
+            color: #6A3A2E;
+        }
+
+        /* Results & Triadic Highlights */
+        .result-box {
+            background-color: var(--soft-green);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+        .alert-cheat {
+            background-color: var(--soft-coral);
+            border-radius: 20px;
+            border: none;
+            padding: 30px;
+            color: #6A3A2E;
+        }
+        .badge-custom {
+            background-color: var(--soft-pink);
+            color: #4A2B6E;
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        /* Accordion Overrides (De-cluttering) */
+        .accordion-item {
+            border: none;
+            background: transparent;
+            margin-bottom: 10px;
+        }
+        .accordion-button {
+            background-color: var(--off-white);
+            border-radius: 15px !important;
+            font-weight: 600;
+            padding: 15px 25px;
+            border: 1px solid var(--light-gray);
+        }
+        .accordion-button:not(.collapsed) {
+            background-color: var(--soft-blue);
+            color: var(--text-dark);
+            box-shadow: none;
+        }
+        .accordion-body {
+            background-color: var(--pure-white);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 5px;
+            border: 1px solid var(--light-gray);
+        }
+        
+        /* Auto-Rubric Master Tool */
+        .master-tool {
+            background: rgba(255,255,255,0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 30px;
+            max-width: 800px;
+            margin: 0 auto;
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+    </style>
 </head>
-<body class="bg-light">
-    <div class="container mt-5">
-        <h2 class="mb-4 text-center">AI-Based Answer Evaluator</h2>
+<body>
 
-        <ul class="nav nav-tabs mb-4" id="evaluatorTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link {% if active_tab != 'bulk' and active_tab != 'exam' %}active{% endif %}" id="single-tab" data-bs-toggle="tab" data-bs-target="#single" type="button" role="tab">Single Student (Hybrid)</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link {% if active_tab == 'bulk' %}active{% endif %}" id="bulk-tab" data-bs-toggle="tab" data-bs-target="#bulk" type="button" role="tab">Bulk CSV Upload</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link {% if active_tab == 'exam' %}active{% endif %}" id="exam-tab" data-bs-toggle="tab" data-bs-target="#exam" type="button" role="tab">Full Exam (Word/PDF)</button>
-            </li>
-        </ul>
+    <div class="hero-section">
+        <h1 class="hero-title">AI Answer Evaluator</h1>
+        <p class="fs-5 text-dark mb-4 opacity-75">Powered by Gemini 2.5 Flash & Semantic Analysis</p>
+        
+        <div class="master-tool shadow-sm">
+            <h4 class="fw-bold mb-3">✨ Reverse AI: Auto-Rubric Generator</h4>
+            <p class="text-dark opacity-75 small">Paste a paragraph or chapter from the textbook. The AI will instantly read it, extract the key concepts, and populate the grading rubrics for all tools below.</p>
+            <textarea id="sourceText" class="form-control mb-3" rows="3" placeholder="Paste textbook material here..."></textarea>
+            <button class="btn btn-primary-custom w-100" id="genRubricBtn" onclick="generateRubric()">Extract Knowledge & Generate Rubric</button>
+        </div>
+    </div>
 
-        <div class="tab-content" id="myTabContent">
-            
-            <div class="tab-pane fade {% if active_tab != 'bulk' and active_tab != 'exam' %}show active{% endif %}" id="single" role="tabpanel">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="card shadow-sm mb-4 border-dark">
-                            <div class="card-header bg-dark text-white fw-bold">Hybrid Rubric Builder</div>
-                            <div class="card-body">
-                                <form method="POST" action="/">
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">Teacher's Model Answer</label>
-                                        <textarea class="form-control" name="teacher_answer" rows="2" required></textarea>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">Key Concepts (comma-separated)</label>
-                                        <input type="text" class="form-control" name="concepts" placeholder="e.g. photosynthesis, sunlight, water">
-                                    </div>
-                                    
-                                    <div class="alert alert-primary p-2 mb-3">
-                                        <label class="form-label fw-bold mb-0">AI Allocated Marks (Text & Meaning)</label>
-                                        <input type="number" class="form-control mt-1" name="ai_marks" value="5" min="1" step="0.5" required>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold text-secondary">Advanced Subjective Parameters</label>
-                                        <p class="text-muted" style="font-size: 0.85em;">Select parameters the local AI cannot grade to reserve them for manual review.</p>
-                                        
-                                        <div class="accordion accordion-flush border" id="rubricAccordion">
-                                            
-                                            <div class="accordion-item">
-                                                <h2 class="accordion-header">
-                                                    <button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse" data-bs-target="#cat1">
-                                                        <strong>1. Conceptual & Reasoning</strong>
-                                                    </button>
-                                                </h2>
-                                                <div id="cat1" class="accordion-collapse collapse bg-light" data-bs-parent="#rubricAccordion">
-                                                    <div class="accordion-body py-2">
-                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p1" value="Conceptual Accuracy"> <small>Conceptual Accuracy (No wrong facts)</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p1" placeholder="Marks" step="0.5"></div></div>
-                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p3" value="Depth of Explanation"> <small>Depth of Explanation</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p3" placeholder="Marks" step="0.5"></div></div>
-                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p5" value="Critical Understanding"> <small>Critical Understanding (Explains 'Why')</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p5" placeholder="Marks" step="0.5"></div></div>
-                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p6" value="Concept Linking"> <small>Concept Linking (Connections)</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p6" placeholder="Marks" step="0.5"></div></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="accordion-item">
-                                                <h2 class="accordion-header">
-                                                    <button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse" data-bs-target="#cat2">
-                                                        <strong>2. Content & Examples</strong>
-                                                    </button>
-                                                </h2>
-                                                <div id="cat2" class="accordion-collapse collapse bg-light" data-bs-parent="#rubricAccordion">
-                                                    <div class="accordion-body py-2">
-                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p8" value="Information Density"> <small>Information Density</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p8" placeholder="Marks" step="0.5"></div></div>
-                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p10" value="Examples and Applications"> <small>Examples & Applications</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p10" placeholder="Marks" step="0.5"></div></div>
-                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p11" value="Step-by-Step Explanation"> <small>Step-by-Step Explanation</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p11" placeholder="Marks" step="0.5"></div></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="accordion-item">
-                                                <h2 class="accordion-header">
-                                                    <button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse" data-bs-target="#cat3">
-                                                        <strong>3. Writing Quality & Tone</strong>
-                                                    </button>
-                                                </h2>
-                                                <div id="cat3" class="accordion-collapse collapse bg-light" data-bs-parent="#rubricAccordion">
-                                                    <div class="accordion-body py-2">
-                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p13" value="Clarity of Explanation"> <small>Clarity of Explanation</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p13" placeholder="Marks" step="0.5"></div></div>
-                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p15" value="Academic Tone"> <small>Academic Tone</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p15" placeholder="Marks" step="0.5"></div></div>
-                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p34" value="Originality / Personal Style"> <small>Originality / Personal Style</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p34" placeholder="Marks" step="0.5"></div></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="accordion-item">
-                                                <h2 class="accordion-header">
-                                                    <button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse" data-bs-target="#cat4">
-                                                        <strong>4. Structure & Visuals</strong>
-                                                    </button>
-                                                </h2>
-                                                <div id="cat4" class="accordion-collapse collapse bg-light" data-bs-parent="#rubricAccordion">
-                                                    <div class="accordion-body py-2">
-                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p18" value="Logical Flow of Ideas"> <small>Logical Flow of Ideas</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p18" placeholder="Marks" step="0.5"></div></div>
-                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p19" value="Structure and Organization"> <small>Structure & Organization</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p19" placeholder="Marks" step="0.5"></div></div>
-                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p23" value="Diagrams & Visual Quality"> <small>Diagrams & Visual Quality</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p23" placeholder="Marks" step="0.5"></div></div>
-                                                        <div class="row mb-1 align-items-center"><div class="col-8"><input class="form-check-input me-1" type="checkbox" name="check_p29" value="Handwriting Suitability"> <small>Handwriting Suitability</small></div><div class="col-4"><input type="number" class="form-control form-control-sm" name="mark_p29" placeholder="Marks" step="0.5"></div></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                    </div>
-
-                                    <hr>
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold text-primary">Student's Answer</label>
-                                        <textarea class="form-control" name="student_answer" rows="3" required></textarea>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary w-100 fw-bold">Evaluate Hybrid Answer</button>
-                                </form>
+    <div class="container-fluid px-lg-5">
+        
+        <section id="single-section" class="glass-card">
+            <div class="row gx-5">
+                <div class="col-xl-6">
+                    <h2 class="section-title"><span class="section-number">1</span> Hybrid Student Grader</h2>
+                    <form method="POST" action="/">
+                        <label class="form-label">Teacher's Model Answer</label>
+                        <textarea class="form-control" name="teacher_answer" id="single_teacher_answer" rows="3" required></textarea>
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <label class="form-label">Key Concepts (comma-separated)</label>
+                                <input type="text" class="form-control" name="concepts" id="single_concepts" placeholder="e.g. photosynthesis, sunlight, water">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">AI Marks</label>
+                                <input type="number" class="form-control" name="ai_marks" value="5" min="1" step="0.5" required>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="col-md-6">
-                        {% if results %}
-                        <div class="card shadow-sm border-success mb-3">
-                            <div class="card-header bg-success text-white fw-bold">Evaluation Results</div>
-                            <div class="card-body">
-                                
-                                <h5 class="text-success border-bottom pb-2">🤖 AI Score: {{ "%.1f"|format(results.ai_eval.awarded_marks) }} / {{ results.ai_eval.total_marks }}</h5>
-                                
-                                {% if results.ai_eval.feedback %}
-                                <div class="alert alert-info p-2 mt-2 mb-2" style="font-size: 0.9em;">
-                                    <strong>✨ AI Feedback:</strong> {{ results.ai_eval.feedback }}
-                                </div>
-                                {% endif %}
-                                
-                                <p class="mb-1" style="font-size: 0.9em;"><strong>Semantic Match:</strong> {{ results.ai_eval.semantic_similarity }}%</p>
-                                <p class="mb-1" style="font-size: 0.9em;"><strong>Concepts Found:</strong> {{ results.ai_eval.concepts_found | join(", ") if results.ai_eval.concepts_found else "None" }}</p>
-                                
-                                {% if results.ai_eval.missing_concepts %}
-                                    <p class="mb-1 text-danger" style="font-size: 0.9em;"><strong>Missing:</strong> {{ results.ai_eval.missing_concepts | join(", ") }}</p>
-                                {% endif %}
-
-                                {% if results.ai_eval.irrelevant_sentences %}
-                                <div class="alert alert-warning mt-3 p-2">
-                                    <strong>⚠️ Fluff Detected:</strong>
-                                    <ul class="mb-0 mt-1" style="font-size: 0.85em;">
-                                        {% for fluff in results.ai_eval.irrelevant_sentences %}
-                                            <li>"{{ fluff }}"</li>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
-                                {% endif %}
-
-                                {% if results.manual_params %}
-                                <h5 class="text-warning border-bottom pb-2 mt-4">👨‍🏫 Pending Manual Review</h5>
-                                <ul class="list-group mb-3">
-                                    {% for param, mark in results.manual_params.items() %}
-                                    <li class="list-group-item d-flex justify-content-between align-items-center py-1">
-                                        {{ param }}
-                                        <span class="badge bg-warning text-dark rounded-pill">Out of {{ mark }} marks</span>
-                                    </li>
-                                    {% endfor %}
-                                </ul>
-                                {% endif %}
-
-                                <div class="alert alert-dark mt-4 text-center">
-                                    <h6 class="mb-0">Maximum Possible Score: <strong>{{ results.grand_total_marks }}</strong></h6>
-                                    <small>(AI Marks + Manual Marks)</small>
-                                </div>
-
+                        <label class="form-label mt-4">Advanced Subjective Parameters (Optional)</label>
+                        <div class="accordion" id="rubricAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cat1">Conceptual & Reasoning</button></h2>
+                                <div id="cat1" class="accordion-collapse collapse" data-bs-parent="#rubricAccordion"><div class="accordion-body">
+                                    <div class="d-flex justify-content-between mb-2 align-items-center"><label><input class="form-check-input me-2" type="checkbox" name="check_p1" value="Conceptual Accuracy"> Conceptual Accuracy</label><input type="number" class="form-control form-control-sm w-25" name="mark_p1" placeholder="Marks" step="0.5"></div>
+                                    <div class="d-flex justify-content-between mb-2 align-items-center"><label><input class="form-check-input me-2" type="checkbox" name="check_p3" value="Depth of Explanation"> Depth of Explanation</label><input type="number" class="form-control form-control-sm w-25" name="mark_p3" placeholder="Marks" step="0.5"></div>
+                                </div></div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cat2">Content & Examples</button></h2>
+                                <div id="cat2" class="accordion-collapse collapse" data-bs-parent="#rubricAccordion"><div class="accordion-body">
+                                    <div class="d-flex justify-content-between mb-2 align-items-center"><label><input class="form-check-input me-2" type="checkbox" name="check_p10" value="Examples and Applications"> Examples & Applications</label><input type="number" class="form-control form-control-sm w-25" name="mark_p10" placeholder="Marks" step="0.5"></div>
+                                </div></div>
                             </div>
                         </div>
-                        {% else %}
-                        <div class="card shadow-sm border-secondary dashed">
-                            <div class="card-body text-center text-muted">
-                                <p class="mt-4 mb-4">Set your rubric and submit an answer to see the hybrid evaluation.</p>
-                            </div>
+
+                        <hr class="my-4" style="opacity: 0.1;">
+                        <label class="form-label text-primary fs-5">Student's Answer</label>
+                        <textarea class="form-control mb-4" name="student_answer" rows="4" required></textarea>
+                        
+                        <button type="submit" class="btn btn-primary-custom w-100">Evaluate Single Answer</button>
+                    </form>
+                </div>
+
+                <div class="col-xl-6 mt-5 mt-xl-0">
+                    {% if results %}
+                    <div class="result-box h-100 d-flex flex-column justify-content-center">
+                        <h1 class="display-3 fw-bold text-dark text-center mb-0">{{ "%.1f"|format(results.ai_eval.awarded_marks) }} <span class="fs-3 text-muted">/ {{ results.ai_eval.total_marks }}</span></h1>
+                        <p class="text-center fw-bold opacity-75">AI Evaluation Score</p>
+                        
+                        <div class="bg-white p-4 rounded-4 shadow-sm mt-4">
+                            <h5 class="fw-bold mb-2">✨ AI Feedback</h5>
+                            <p class="mb-0 text-dark">{{ results.ai_eval.feedback }}</p>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between bg-white p-3 rounded-4 shadow-sm mt-3">
+                            <span class="fw-bold">Semantic Match:</span>
+                            <span class="badge-custom">{{ results.ai_eval.semantic_similarity }}%</span>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-4 shadow-sm mt-3">
+                            <p class="mb-1"><strong>Found Concepts:</strong> {{ results.ai_eval.concepts_found | join(", ") if results.ai_eval.concepts_found else "None" }}</p>
+                            {% if results.ai_eval.missing_concepts %}
+                                <p class="mb-0 text-danger"><strong>Missing:</strong> {{ results.ai_eval.missing_concepts | join(", ") }}</p>
+                            {% endif %}
+                        </div>
+
+                        {% if results.manual_params %}
+                        <div class="bg-white p-4 rounded-4 shadow-sm mt-3 border border-warning">
+                            <h6 class="fw-bold text-warning mb-3">👨‍🏫 Pending Manual Review</h6>
+                            {% for param, mark in results.manual_params.items() %}
+                                <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                                    <span>{{ param }}</span> <strong>Out of {{ mark }}</strong>
+                                </div>
+                            {% endfor %}
+                            <h5 class="text-center mt-3 mb-0">Max Possible: {{ results.grand_total_marks }}</h5>
                         </div>
                         {% endif %}
                     </div>
+                    {% else %}
+                    <div class="h-100 d-flex align-items-center justify-content-center" style="border: 3px dashed var(--light-gray); border-radius: 30px;">
+                        <h4 class="text-muted opacity-50 px-5 text-center">Set your rubric and submit an answer to see the detailed AI evaluation here.</h4>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
+        </section>
 
-            <div class="tab-pane fade {% if active_tab == 'bulk' %}show active{% endif %}" id="bulk" role="tabpanel">
-                {% if bulk_results %}
-                <div class="card shadow-sm border-primary mb-4">
-                    <div class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center">
-                        <span>Class Insights Dashboard</span>
-                        <a href="/download" class="btn btn-light btn-sm fw-bold text-primary">📥 Download Graded CSV</a>
+        <section id="bulk-section" class="glass-card">
+            <h2 class="section-title"><span class="section-number" style="background:var(--soft-pink);">2</span> Class Insights Dashboard (CSV)</h2>
+            
+            {% if bulk_results %}
+                {% if bulk_results.flagged_cheaters %}
+                <div class="alert-cheat mb-5 shadow-sm">
+                    <h3 class="fw-bold mb-3">⚠️ Suspected Collusion Radar</h3>
+                    <p>The AI detected highly identical semantic structures between these students:</p>
+                    <div class="row">
+                        {% for cheat in bulk_results.flagged_cheaters %}
+                        <div class="col-md-4 mb-2">
+                            <div class="bg-white p-3 rounded-3 shadow-sm text-center">
+                                <strong>{{ cheat.student1 }}</strong> & <strong>{{ cheat.student2 }}</strong><br>
+                                <span class="fs-5 fw-bold text-danger">{{ cheat.similarity }}% Match</span>
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
-                    <div class="card-body">
-                        <div class="row text-center mb-4 mt-2">
-                            <div class="col-md-6">
-                                <h5 class="text-muted">Total Students Graded</h5>
-                                <h2 class="text-primary fw-bold">{{ bulk_results.total_students }}</h2>
-                            </div>
-                            <div class="col-md-6">
-                                <h5 class="text-muted">Class Average</h5>
-                                <h2 class="text-success fw-bold">{{ bulk_results.average_score }} / {{ bulk_results.total_marks }}</h2>
-                            </div>
+                </div>
+                {% endif %}
+
+                <div class="row align-items-center mb-5">
+                    <div class="col-md-3 text-center">
+                        <h1 class="display-4 fw-bold text-dark">{{ bulk_results.total_students }}</h1>
+                        <p class="text-muted fw-bold">Total Graded</p>
+                    </div>
+                    <div class="col-md-3 text-center border-end">
+                        <h1 class="display-4 fw-bold text-dark">{{ bulk_results.average_score }} <span class="fs-4 text-muted">/ {{ bulk_results.total_marks }}</span></h1>
+                        <p class="text-muted fw-bold">Class Average</p>
+                    </div>
+                    <div class="col-md-6 text-md-end text-center mt-4 mt-md-0">
+                        <a href="/download" class="btn btn-primary-custom shadow-sm btn-lg me-2">📥 Download CSV</a>
+                        <a href="/" class="btn btn-secondary-custom shadow-sm btn-lg">Grade Another</a>
+                    </div>
+                </div>
+                
+                <div class="row gx-5">
+                    <div class="col-md-6 mb-4">
+                        <div class="bg-white p-4 rounded-4 shadow-sm border h-100">
+                            <h5 class="text-center fw-bold mb-4">Grade Distribution</h5>
+                            <canvas id="distChart"></canvas>
                         </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h5 class="text-center">Grade Distribution</h5>
-                                <canvas id="distChart"></canvas>
-                            </div>
-                            <div class="col-md-6">
-                                <h5 class="text-center">Most Missed Concepts</h5>
-                                {% if bulk_results.concept_labels|length > 0 %}
-                                    <canvas id="conceptChart"></canvas>
-                                {% else %}
-                                    <div class="alert alert-success mt-4 text-center">Perfect! No key concepts were missed by the class.</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="text-center mt-4">
-                            <a href="/" class="btn btn-outline-secondary">Grade Another CSV</a>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="bg-white p-4 rounded-4 shadow-sm border h-100">
+                            <h5 class="text-center fw-bold mb-4">Most Missed Concepts</h5>
+                            {% if bulk_results.concept_labels|length > 0 %}
+                                <canvas id="conceptChart"></canvas>
+                            {% else %}
+                                <div class="h-100 d-flex align-items-center justify-content-center">
+                                    <h4 class="text-success text-center">Perfect! No key concepts were missed.</h4>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
 
                 <script>
-                    const distLabels = {{ bulk_results.dist_labels | tojson }};
-                    const distData = {{ bulk_results.dist_data | tojson }};
-                    const conceptLabels = {{ bulk_results.concept_labels | tojson }};
-                    const conceptData = {{ bulk_results.concept_data | tojson }};
-
-                    new Chart(document.getElementById('distChart'), {
+                    const ctxDist = document.getElementById('distChart');
+                    new Chart(ctxDist, {
                         type: 'bar',
                         data: {
-                            labels: distLabels,
+                            labels: {{ bulk_results.dist_labels | tojson }},
                             datasets: [{
-                                label: 'Number of Students',
-                                data: distData,
-                                backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                                borderColor: 'rgba(54, 162, 235, 1)',
-                                borderWidth: 1
+                                label: 'Students',
+                                data: {{ bulk_results.dist_data | tojson }},
+                                backgroundColor: '#B9CEFF', // Triadic/Analogous chart colors
+                                borderRadius: 8
                             }]
                         },
                         options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
                     });
 
-                    if (conceptLabels.length > 0) {
-                        new Chart(document.getElementById('conceptChart'), {
+                    if ({{ bulk_results.concept_labels | tojson }}.length > 0) {
+                        const ctxConcept = document.getElementById('conceptChart');
+                        new Chart(ctxConcept, {
                             type: 'bar',
                             data: {
-                                labels: conceptLabels,
+                                labels: {{ bulk_results.concept_labels | tojson }},
                                 datasets: [{
-                                    label: 'Times Missed by Class',
-                                    data: conceptData,
-                                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
-                                    borderColor: 'rgba(255, 99, 132, 1)',
-                                    borderWidth: 1
+                                    label: 'Times Missed',
+                                    data: {{ bulk_results.concept_data | tojson }},
+                                    backgroundColor: '#FFC7B9', 
+                                    borderRadius: 8
                                 }]
                             },
                             options: { indexAxis: 'y', scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } } }
                         });
                     }
                 </script>
-
-                {% else %}
-                <div class="card shadow-sm mb-4">
-                    <div class="card-body">
-                        <h5 class="card-title text-primary">Grade an Entire Class Instantly</h5>
-                        <p class="text-muted">Upload a CSV file containing columns named <strong>Student_ID</strong> and <strong>Student_Answer</strong>.</p>
-                        
-                        <form method="POST" action="/bulk" enctype="multipart/form-data">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Teacher's Model Answer</label>
-                                <textarea class="form-control" name="bulk_teacher_answer" rows="2" required></textarea>
-                            </div>
+            {% else %}
+                <div class="row gx-5">
+                    <div class="col-lg-5">
+                        <p class="text-muted fs-5 mb-4">Upload a `.csv` file with <strong>Student_ID</strong> and <strong>Student_Answer</strong> columns to instantly grade an entire classroom and detect peer plagiarism.</p>
+                        <div class="bg-light p-4 rounded-4 border">
+                            <h6 class="fw-bold">How the Anti-Cheat Radar works:</h6>
+                            <p class="small text-muted mb-0">As the AI grades the CSV, it automatically cross-references every student's answer against every other student using difflib sequencing. If any two answers are over 85% identical, they are flagged on the dashboard.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-7 mt-4 mt-lg-0">
+                        <form method="POST" action="/bulk" enctype="multipart/form-data" class="bg-white p-4 rounded-4 shadow-sm border">
+                            <label class="form-label">Teacher's Model Answer</label>
+                            <textarea class="form-control mb-3" name="bulk_teacher_answer" id="bulk_teacher_answer" rows="2" required></textarea>
+                            
                             <div class="row">
                                 <div class="col-md-8 mb-3">
-                                    <label class="form-label fw-bold">Key Concepts (comma-separated)</label>
-                                    <input type="text" class="form-control" name="bulk_concepts">
+                                    <label class="form-label">Key Concepts</label>
+                                    <input type="text" class="form-control" name="bulk_concepts" id="bulk_concepts">
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label fw-bold">Total Marks</label>
+                                    <label class="form-label">Total Marks</label>
                                     <input type="number" class="form-control" name="bulk_total_marks" value="5" min="1" required>
                                 </div>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Upload Student CSV</label>
-                                <input type="file" class="form-control" name="csv_file" accept=".csv" required>
-                            </div>
-                            <button type="submit" class="btn btn-success w-100">Upload & Generate Dashboard</button>
+                            
+                            <label class="form-label">Upload CSV File</label>
+                            <input type="file" class="form-control mb-4" name="csv_file" accept=".csv" required>
+                            
+                            <button type="submit" class="btn btn-primary-custom w-100">Upload & Generate Class Dashboard</button>
                         </form>
                     </div>
                 </div>
-                {% endif %}
-            </div>
+            {% endif %}
+        </section>
 
-            <div class="tab-pane fade {% if active_tab == 'exam' %}show active{% endif %}" id="exam" role="tabpanel">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="card shadow-sm mb-4">
-                            <div class="card-body">
-                                <h5 class="card-title text-warning fw-bold">Multi-Question Exam Grader</h5>
-                                <p class="text-muted">Upload Word (.docx) or PDF files formatted with <code>[Q1]</code>, <code>[Q2]</code> tags.</p>
-                                
-                                <form method="POST" action="/exam" enctype="multipart/form-data">
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label fw-bold text-success">1. Teacher's Master Key</label>
-                                            <input type="file" class="form-control" name="teacher_doc" accept=".docx,.pdf" required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label fw-bold text-primary">2. Student's Submission</label>
-                                            <input type="file" class="form-control" name="student_doc" accept=".docx,.pdf" required>
-                                        </div>
-                                    </div>
-                                    <button type="submit" class="btn btn-warning text-dark fw-bold w-100 mt-2">Parse and Grade Exam</button>
-                                </form>
-                            </div>
+        <section id="exam-section" class="glass-card mb-5">
+            <h2 class="section-title"><span class="section-number" style="background:var(--soft-blue);">3</span> Multi-Question Exam Grader</h2>
+            <div class="row gx-5">
+                <div class="col-lg-5">
+                    <p class="text-muted fs-5">Upload complete Word (`.docx`) or PDF documents formatted with <code>[Q1]</code>, <code>[Q2]</code> tags to grade entire exams at once.</p>
+                </div>
+                <div class="col-lg-7">
+                    <form method="POST" action="/exam" enctype="multipart/form-data" class="bg-white p-4 rounded-4 shadow-sm border d-flex gap-3 flex-column flex-md-row">
+                        <div class="w-100">
+                            <label class="form-label fw-bold">1. Master Key (Docx/PDF)</label>
+                            <input type="file" class="form-control" name="teacher_doc" accept=".docx,.pdf" required>
                         </div>
-
-                        {% if exam_report %}
-                        <div class="card shadow-sm border-warning mb-4">
-                            <div class="card-header bg-warning text-dark fw-bold">Final Exam Report</div>
-                            <div class="card-body">
-                                <div class="text-center mb-4">
-                                    <h5 class="text-muted">Final Exam Score</h5>
-                                    <h1 class="text-dark fw-bold display-4">{{ exam_report.total_awarded }} <span class="text-muted fs-4">/ {{ exam_report.total_possible }}</span></h1>
-                                    <h4 class="{% if exam_report.percentage >= 80 %}text-success{% elif exam_report.percentage >= 60 %}text-warning{% else %}text-danger{% endif %} fw-bold">
-                                        {{ exam_report.percentage }}%
-                                    </h4>
-                                </div>
-                                
-                                <hr>
-                                <h5 class="mb-3">Question Breakdown:</h5>
-                                
-                                <div class="accordion" id="examAccordion">
-                                    {% for q in exam_report.question_breakdown %}
-                                    <div class="accordion-item">
-                                        <h2 class="accordion-header" id="heading{{ loop.index }}">
-                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}">
-                                                <strong>{{ q.question_id }}</strong> &nbsp;- Score: <span class="text-success ms-2 fw-bold">{{ q.awarded_marks }} / {{ q.total_marks }}</span>
-                                            </button>
-                                        </h2>
-                                        <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#examAccordion">
-                                            <div class="accordion-body">
-                                                <p><strong>Student Wrote:</strong> <br><span class="text-muted">{{ q.student_answer if q.student_answer else "No answer provided." }}</span></p>
-                                                
-                                                <div class="d-flex justify-content-between align-items-center mt-3 p-2 bg-light rounded">
-                                                    <span><strong>Meaning Match:</strong> {{ q.semantic_similarity }}%</span>
-                                                    <span>
-                                                        <strong>Concepts Missing:</strong> 
-                                                        {% if q.missing_concepts %}
-                                                            <span class="text-danger">{{ q.missing_concepts | join(", ") }}</span>
-                                                        {% else %}
-                                                            <span class="text-success">None</span>
-                                                        {% endif %}
-                                                    </span>
-                                                </div>
-
-                                                {% if q.irrelevant_sentences %}
-                                                <div class="text-danger mt-2" style="font-size: 0.85em;">
-                                                    <strong>Fluff Penalty Applied:</strong> Found {{ q.irrelevant_sentences|length }} off-topic sentence(s).
-                                                </div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                                
-                            </div>
+                        <div class="w-100">
+                            <label class="form-label fw-bold">2. Student Submission</label>
+                            <input type="file" class="form-control" name="student_doc" accept=".docx,.pdf" required>
                         </div>
-                        {% endif %}
+                        <div class="d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary-custom w-100" style="height: 58px;">Grade Exam</button>
+                        </div>
+                    </form>
+
+                    {% if exam_report %}
+                    <div class="bg-white p-4 rounded-4 shadow-sm border mt-4">
+                        <div class="text-center mb-4 border-bottom pb-4">
+                            <h4 class="text-muted fw-bold">Final Exam Score</h4>
+                            <h1 class="display-3 fw-bold text-dark">{{ exam_report.total_awarded }} <span class="fs-4 text-muted">/ {{ exam_report.total_possible }}</span></h1>
+                            <span class="badge-custom fs-5">{{ exam_report.percentage }}%</span>
+                        </div>
+                        <h5 class="fw-bold mb-3">Question Breakdown</h5>
+                        {% for q in exam_report.question_breakdown %}
+                            <div class="mb-3 p-3 bg-light rounded-3">
+                                <strong>{{ q.question_id }}</strong>: <span class="text-success fw-bold">{{ q.awarded_marks }} / {{ q.total_marks }} pts</span><br>
+                                <small class="text-muted">Match: {{ q.semantic_similarity }}%</small>
+                            </div>
+                        {% endfor %}
                     </div>
+                    {% endif %}
                 </div>
             </div>
+        </section>
 
-        </div>
     </div>
+
+    <script>
+        // Reverse AI Logic
+        async function generateRubric() {
+            const text = document.getElementById('sourceText').value;
+            if (!text) return alert("Please paste some text first!");
+            
+            const btn = document.getElementById('genRubricBtn');
+            btn.innerText = "⏳ Reading & Generating...";
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/auto-rubric', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({source_text: text})
+                });
+                const data = await res.json();
+                
+                // Populate Single Form
+                if(document.getElementById('single_teacher_answer')) {
+                    document.getElementById('single_teacher_answer').value = data.model_answer;
+                    document.getElementById('single_concepts').value = data.key_concepts;
+                }
+                // Populate Bulk Form
+                if(document.getElementById('bulk_teacher_answer')) {
+                    document.getElementById('bulk_teacher_answer').value = data.model_answer;
+                    document.getElementById('bulk_concepts').value = data.key_concepts;
+                }
+                
+                btn.innerText = "✅ Rubrics Populated Below!";
+                setTimeout(() => { btn.innerText = "Extract Knowledge & Generate Rubric"; }, 3000);
+            } catch (err) {
+                alert("Error generating rubric. Check server.");
+                btn.innerText = "Extract Knowledge & Generate Rubric";
+            } finally {
+                btn.disabled = false;
+            }
+        }
+    </script>
+
+    {% if results %}
+        <script>document.getElementById('single-section').scrollIntoView({behavior: "smooth"});</script>
+    {% endif %}
+    {% if bulk_results %}
+        <script>document.getElementById('bulk-section').scrollIntoView({behavior: "smooth"});</script>
+    {% endif %}
+    {% if exam_report %}
+        <script>document.getElementById('exam-section').scrollIntoView({behavior: "smooth"});</script>
+    {% endif %}
 </body>
 </html>
