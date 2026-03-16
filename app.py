@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, send_file
-from nlp_engine import evaluate_answer
+from llm_engine import evaluate_answer
 import pandas as pd
 import os
 import tempfile
@@ -9,6 +9,21 @@ from collections import Counter
 from document_parser import extract_text_from_file, parse_teacher_key, parse_student_exam
 
 app = Flask(__name__)
+
+# ==========================================
+# 🛡️ SECURITY CONFIGURATIONS
+# ==========================================
+# 1. The Elevator Weight Limit: Cap uploads at 5 Megabytes max
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024 
+
+# 2. The ID Checker: Only allow these exact file types
+ALLOWED_EXTENSIONS = {'csv', 'pdf', 'docx'}
+
+def allowed_file(filename):
+    """Returns True if the file has an extension and it is in our allowed list."""
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# ==========================================
 
 # --- TIER 1: HYBRID SINGLE STUDENT GRADING ---
 @app.route("/", methods=["GET", "POST"])
@@ -24,15 +39,11 @@ def home():
         # 2. DYNAMICALLY catch all manual parameters selected by the teacher
         manual_params = {}
         for key, value in request.form.items():
-            # If the input is a checkbox...
             if key.startswith("check_"):
-                # Find its matching number input (e.g., check_p1 matches mark_p1)
                 mark_key = key.replace("check_", "mark_")
                 mark_val = request.form.get(mark_key)
-                
-                # If the teacher typed a number in the box, save it
                 if mark_val and float(mark_val) > 0:
-                    param_name = value # The value of the checkbox is the parameter name
+                    param_name = value 
                     manual_params[param_name] = float(mark_val)
                     
         total_manual_marks = sum(manual_params.values())
@@ -64,8 +75,11 @@ def bulk_grade():
     raw_concepts = request.form.get("bulk_concepts", "")
     concepts = [c.strip() for c in raw_concepts.split(",") if c.strip()]
 
-    if not file:
-        return "No file uploaded!", 400
+    # 🛡️ SECURITY CHECK: Is there a file, and is it a CSV?
+    if not file or file.filename == '':
+        return "Security Alert: No file uploaded!", 400
+    if not allowed_file(file.filename) or not file.filename.endswith('.csv'):
+        return "Security Alert: Invalid file type! Only .csv files are allowed.", 400
 
     df = pd.read_csv(file)
     awarded_marks_list = []
@@ -128,8 +142,11 @@ def grade_exam():
     teacher_file = request.files.get("teacher_doc")
     student_file = request.files.get("student_doc")
 
+    # 🛡️ SECURITY CHECK: Ensure files exist and are the correct type
     if not teacher_file or not student_file:
-        return "Missing files!", 400
+        return "Security Alert: Missing files!", 400
+    if not allowed_file(teacher_file.filename) or not allowed_file(student_file.filename):
+        return "Security Alert: Invalid file type! Only .pdf and .docx are allowed.", 400
 
     # Save uploaded files temporarily so Python can read them
     temp_dir = tempfile.gettempdir()
@@ -188,5 +205,6 @@ def download_csv():
     return send_file("graded_results.csv", as_attachment=True, download_name="Graded_Class_Results.csv")
 
 if __name__ == "__main__":
-    print("Starting Flask Web Server...")
-    app.run(debug=True)
+    print("Starting Secure Flask Web Server...")
+    # 🛡️ SECURITY: Debug mode is now OFF to hide code from the public
+    app.run(debug=False)

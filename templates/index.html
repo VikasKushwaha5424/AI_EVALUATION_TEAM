@@ -136,6 +136,13 @@
                             <div class="card-body">
                                 
                                 <h5 class="text-success border-bottom pb-2">🤖 AI Score: {{ "%.1f"|format(results.ai_eval.awarded_marks) }} / {{ results.ai_eval.total_marks }}</h5>
+                                
+                                {% if results.ai_eval.feedback %}
+                                <div class="alert alert-info p-2 mt-2 mb-2" style="font-size: 0.9em;">
+                                    <strong>✨ AI Feedback:</strong> {{ results.ai_eval.feedback }}
+                                </div>
+                                {% endif %}
+                                
                                 <p class="mb-1" style="font-size: 0.9em;"><strong>Semantic Match:</strong> {{ results.ai_eval.semantic_similarity }}%</p>
                                 <p class="mb-1" style="font-size: 0.9em;"><strong>Concepts Found:</strong> {{ results.ai_eval.concepts_found | join(", ") if results.ai_eval.concepts_found else "None" }}</p>
                                 
