@@ -2,3 +2,15 @@ venv/
 __pycache__/
 .env
 *.csv
+
+# Environments
+.env
+venv/
+env/
+
+# Python caches
+__pycache__/
+*.pyc
+
+# CSV Output
+graded_results.csv

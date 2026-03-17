@@ -16,48 +16,54 @@ def extract_text_from_file(file_path, filename):
                 text += page.extract_text() + "\n"
     return text
 
-def parse_teacher_key(raw_text):
+def parse_teacher_key(text):
     """
-    Extracts Question ID, Answer, Concepts, and Marks from the Teacher's text.
-    Returns a dictionary: {'Q1': {'answer': '...', 'concepts': [...], 'marks': 5}, ...}
+    Parses the teacher's master document.
+    Expects format:
+    [Q1] Question text...
+    [A1] Answer text...
+    {Marks: 5}
+    {Concepts: a, b}
     """
-    exam_data = {}
-    # Find everything between [Q...] blocks
-    blocks = re.split(r'\[(Q\d+)\]', raw_text)[1:] 
+    questions = {}
+    # Split the document by [Q1], [Q2], etc.
+    q_blocks = re.split(r'\[Q\d+\]', text)[1:] 
     
-    for i in range(0, len(blocks), 2):
-        q_id = blocks[i].strip()
-        content = blocks[i+1]
+    for i, block in enumerate(q_blocks):
+        q_id = f"Q{i+1}"
         
-        # Extract Answer
-        ans_match = re.search(r'Answer:\s*(.*?)(?=\nConcepts:|$)', content, re.DOTALL)
+        # Extract the Answer part using the new [A1], [A2] tags
+        answer_match = re.search(r'\[A\d+\](.*?)(?=\{Marks|\Z)', block, re.DOTALL)
+        answer_text = answer_match.group(1).strip() if answer_match else ""
+        
+        # Extract Marks (supports decimals like 5.5 just in case)
+        marks_match = re.search(r'\{Marks:\s*(\d+(\.\d+)?)\}', block)
+        marks = float(marks_match.group(1)) if marks_match else 5.0
+        
         # Extract Concepts
-        con_match = re.search(r'Concepts:\s*(.*?)(?=\nMarks:|$)', content, re.DOTALL)
-        # Extract Marks
-        marks_match = re.search(r'Marks:\s*(\d+(\.\d+)?)', content)
+        concepts_match = re.search(r'\{Concepts:\s*(.*?)\}', block)
+        concepts = [c.strip() for c in concepts_match.group(1).split(',')] if concepts_match else []
         
-        if ans_match and con_match and marks_match:
-            exam_data[q_id] = {
-                'answer': ans_match.group(1).strip(),
-                'concepts': [c.strip() for c in con_match.group(1).split(',')],
-                'marks': float(marks_match.group(1))
-            }
-    return exam_data
+        questions[q_id] = {
+            "answer": answer_text,
+            "marks": marks,
+            "concepts": concepts
+        }
+    return questions
 
-def parse_student_exam(raw_text):
+def parse_student_exam(text):
     """
-    Extracts Question ID and Student Answer.
-    Returns a dictionary: {'Q1': 'Student answer text...', 'Q2': '...'}
+    Parses the student's document.
+    Now looks specifically for [A1], [A2] tags as requested!
     """
-    student_data = {}
-    blocks = re.split(r'\[(Q\d+)\]', raw_text)[1:]
+    answers = {}
     
-    for i in range(0, len(blocks), 2):
-        q_id = blocks[i].strip()
-        content = blocks[i+1]
+    # Finds all instances of [A1] followed by the text until the next [A...] tag
+    matches = re.finditer(r'\[A(\d+)\](.*?)(?=\[A\d+\]|\Z)', text, re.DOTALL)
+    
+    for match in matches:
+        q_id = f"Q{match.group(1)}" # Maps [A1] back to Q1, [A2] back to Q2
+        student_ans = match.group(2).strip()
+        answers[q_id] = student_ans
         
-        ans_match = re.search(r'Answer:\s*(.*)', content, re.DOTALL)
-        if ans_match:
-            student_data[q_id] = ans_match.group(1).strip()
-            
-    return student_data
+    return answers
