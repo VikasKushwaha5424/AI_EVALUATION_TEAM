@@ -4,13 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Answer Evaluator</title>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
-        /* ==========================================
-           🎨 THEME 1: DEFAULT (Soft & Spacious)
-           ========================================== */
+        /* LIGHT THEME (Default) */
         :root {
             --bg-body: #F7F9F8;
             --bg-card: #FFFFFF;
@@ -23,20 +21,13 @@
             
             --btn-1-bg: #FFEAB9;
             --btn-1-text: #5A4A1E;
-            --btn-2-bg: #FFC7B9;
-            --btn-2-text: #6A3A2E;
 
-            --highlight-main: #CEFFB9;
-            --highlight-alert: #FFC7B9;
             --highlight-badge: #EAB9FF;
-
             --border-color: #E5E7EB;
             --shadow-style: 0 20px 40px rgba(0, 0, 0, 0.04);
         }
 
-        /* ==========================================
-           🌙 THEME 2: DARK MODE (Sleek & Low Light)
-           ========================================== */
+        /* DARK THEME OVERRIDES */
         body.theme-dark {
             --bg-body: #121212;
             --bg-card: #1E1E1E;
@@ -49,91 +40,26 @@
             
             --btn-1-bg: #D4AF37;
             --btn-1-text: #1E1E1E;
-            --btn-2-bg: #C26055;
-            --btn-2-text: #1E1E1E;
 
-            --highlight-main: #4A7A4A;
-            --highlight-alert: #C26055;
             --highlight-badge: #603A70;
-
             --border-color: #333333;
             --shadow-style: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
-        /* Dark Mode Bootstrap Overrides */
+        /* Dark Mode specific bootstrap fixes */
+        body.theme-dark .bg-white, body.theme-dark .bg-light { background-color: var(--bg-card) !important; color: var(--text-main) !important; border-color: var(--border-color) !important; }
         body.theme-dark .text-dark { color: var(--text-main) !important; }
-        body.theme-dark .bg-white { background-color: var(--bg-card) !important; }
-        body.theme-dark .bg-light { background-color: #252525 !important; border-color: #444 !important; }
-        body.theme-dark .table { color: var(--text-main) !important; }
-        body.theme-dark .text-primary { color: #82A5FF !important; }
-        body.theme-dark .text-success { color: #82FFB0 !important; }
+        body.theme-dark pre { color: #82A5FF !important; }
+        body.theme-dark .accordion-button { background-color: var(--bg-input); color: var(--text-main); }
+        body.theme-dark .accordion-button:not(.collapsed) { background-color: #3A4C70; color: #FFF; }
+        body.theme-dark .nav-pills .nav-link:not(.active) { color: #AAAAAA; }
 
-        /* ==========================================
-           🌸 THEME 3: COLORFUL (Batch 1 Palette)
-           Analogous Bg, Split Complementary Btns, Triadic Highlights
-           ========================================== */
-        body.theme-colorful {
-            /* Neutrals for UI Readability */
-            --bg-body: #F7F9F8;
-            --bg-card: #FFFFFF;
-            --bg-input: #FFFFFF;
-            --text-main: #2A2A35;
-            --text-muted: #6B7280;
-
-            /* Analogous Backgrounds */
-            --hero-grad-1: #FFA5C0;
-            --hero-grad-2: #FFB7A5;
-            
-            /* Split Complementary Buttons */
-            --btn-1-bg: #A5FFE4;
-            --btn-1-text: #004D40;
-            --btn-2-bg: #A5C0FF;
-            --btn-2-text: #002D6B;
-
-            /* Triadic Highlights */
-            --highlight-main: #FFE4A5;
-            --highlight-alert: #FFA5C0;
-            --highlight-badge: #A5FFB7;
-
-            --border-color: #E5E7EB;
-            --shadow-style: 0 20px 40px rgba(255, 165, 192, 0.2);
-        }
-
-        /* ------------------------------------------
-           BASE STYLES
-           ------------------------------------------ */
         body {
             background-color: var(--bg-body);
             color: var(--text-main);
             font-family: 'Segoe UI', system-ui, sans-serif;
             transition: background-color 0.4s, color 0.4s;
         }
-
-        /* Theme Switcher Toggle */
-        .theme-switcher {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(0,0,0,0.8);
-            padding: 6px;
-            border-radius: 30px;
-            z-index: 1000;
-            display: flex;
-            gap: 5px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-        .theme-switcher button {
-            border: none;
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 0.85em;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .btn-theme-default { background: #EAB9FF; color: #4A2B6E; }
-        .btn-theme-dark { background: #333; color: #FFF; border: 1px solid #555; }
-        .btn-theme-colorful { background: linear-gradient(90deg, #FFA5C0, #FFB7A5); color: #6A3A2E; }
 
         .hero-section {
             background: linear-gradient(135deg, var(--hero-grad-1) 0%, var(--hero-grad-2) 100%);
@@ -146,17 +72,6 @@
             transition: all 0.4s;
         }
 
-        .master-tool {
-            background: var(--bg-card);
-            opacity: 0.95;
-            border-radius: 25px;
-            padding: 30px;
-            max-width: 800px;
-            margin: 0 auto;
-            border: 1px solid var(--border-color);
-            transition: all 0.4s;
-        }
-
         .glass-card {
             background: var(--bg-card);
             border-radius: 30px;
@@ -164,6 +79,7 @@
             box-shadow: var(--shadow-style);
             border: 1px solid var(--border-color);
             margin-bottom: 50px;
+            position: relative;
             transition: all 0.4s;
         }
 
@@ -182,422 +98,362 @@
             box-shadow: none;
         }
 
-        .form-label { font-weight: 700; margin-bottom: 8px; margin-top: 15px; }
-
         .btn-custom {
             font-weight: 700;
             padding: 16px 24px;
             border-radius: 15px;
             border: none;
+            background-color: var(--btn-1-bg);
+            color: var(--btn-1-text);
             transition: all 0.2s;
-            white-space: normal; 
-            word-wrap: break-word; 
-            line-height: 1.4;
-            display: inline-block;
             width: 100%;
         }
+        .btn-custom:hover { filter: brightness(0.95); transform: translateY(-2px); }
 
-        .btn-yellow { background-color: var(--btn-1-bg); color: var(--btn-1-text); }
-        .btn-yellow:hover { filter: brightness(0.95); transform: translateY(-2px); }
-
-        .btn-coral { background-color: var(--btn-2-bg); color: var(--btn-2-text); }
-        .btn-coral:hover { filter: brightness(0.95); transform: translateY(-2px); }
-
-        .result-box {
-            background-color: var(--highlight-main);
-            color: var(--text-main);
-            border-radius: 20px;
-            padding: 30px;
-            transition: background-color 0.4s;
-        }
-        .alert-cheat {
-            background-color: var(--highlight-alert);
-            border-radius: 20px;
-            padding: 30px;
-            color: var(--text-main);
-            transition: background-color 0.4s;
-        }
         .badge-custom {
             background-color: var(--highlight-badge);
             color: var(--text-main);
             padding: 8px 15px;
             border-radius: 10px;
             font-weight: 700;
-            transition: background-color 0.4s;
+        }
+        
+        .feedback-box {
+            background-color: var(--bg-input);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: var(--shadow-style);
+        }
+
+        /* Loading Overlay */
+        #loading-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(8px);
+        }
+        
+        /* Floating Theme Toggle */
+        #themeToggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            z-index: 1000;
         }
     </style>
 </head>
 <body>
 
-    <!-- THEME SWITCHER UI -->
-    <div class="theme-switcher">
-        <button onclick="setTheme('default')" class="btn-theme-default">Soft</button>
-        <button onclick="setTheme('dark')" class="btn-theme-dark">Dark</button>
-        <button onclick="setTheme('colorful')" class="btn-theme-colorful">Colorful</button>
+    <button id="themeToggle" class="btn btn-dark shadow-sm">🌙 Dark Mode</button>
+
+    <div id="loading-overlay" class="d-none">
+        <div class="spinner-border text-primary" style="width: 4rem; height: 4rem; border-width: 0.4em;" role="status"></div>
+        <h2 class="mt-4 fw-bold" style="color: var(--text-main);">🧠 AI is analyzing the exam...</h2>
+        <p class="text-muted fs-5 mb-4">Please wait, this usually takes 10 to 15 seconds.</p>
+        <button type="button" class="btn btn-danger btn-lg fw-bold shadow-sm" onclick="cancelEvaluation()">✖ Cancel & Abort</button>
     </div>
 
-    <!-- HERO & REVERSE AI -->
     <div class="hero-section">
-        <h1 class="fw-bold display-4 mb-2 text-dark" style="color: var(--text-main) !important;">AI Answer Evaluator</h1>
-        <p class="fs-5 opacity-75 mb-4 text-dark" style="color: var(--text-main) !important;">Unified Semantic Grading Pipeline</p>
-        
-        <div class="master-tool shadow-sm">
-            <h4 class="fw-bold mb-3">✨ Reverse AI: Auto-Rubric Generator</h4>
-            <p class="opacity-75 small">Paste a textbook chapter here. The AI will instantly read it, extract key concepts, and populate the Master Rubric below for you.</p>
-            <textarea id="sourceText" class="form-control mb-3" rows="3" placeholder="Paste textbook material here..."></textarea>
-            <button class="btn-custom btn-yellow" id="genRubricBtn" onclick="generateRubric()">Extract Knowledge & Generate Rubric</button>
-        </div>
+        <h1 class="fw-bold display-4 mb-2">🧠 AI Answer Evaluator</h1>
+        <p class="fs-5 opacity-75 mb-4">Unified Semantic Grading Pipeline</p>
     </div>
 
     <div class="container-fluid px-lg-5">
-
-        <!-- ==========================================
-             THE UNIVERSAL PIPELINE FORM
-             ========================================== -->
-        <form method="POST" action="/evaluate" enctype="multipart/form-data">
-            <div class="row gx-5">
-                
-                <!-- LEFT COLUMN: THE MASTER RUBRIC -->
-                <div class="col-xl-6">
-                    <div class="glass-card h-100">
-                        <h3 class="fw-bold mb-4 border-bottom pb-3">1. Define Master Rubric</h3>
-                        
-                        <label class="form-label">Teacher's Model Answer</label>
-                        <textarea class="form-control" name="teacher_answer" id="master_teacher_answer" rows="3" required placeholder="What is the ideal answer?"></textarea>
-                        
-                        <label class="form-label">Key Concepts (comma-separated)</label>
-                        <input type="text" class="form-control" name="concepts" id="master_concepts" placeholder="e.g. gravity, mass, acceleration">
-                        
-                        <div class="row">
-                            <div class="col-md-4">
-                                <label class="form-label">Total Marks</label>
-                                <input type="number" class="form-control" name="total_marks" value="5" min="1" step="0.5" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Grading Strictness</label>
-                                <select class="form-select" name="strictness">
-                                    <option value="Lenient">Lenient</option>
-                                    <option value="Normal" selected>Normal</option>
-                                    <option value="Strict">Strict</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Feedback Style</label>
-                                <select class="form-select" name="feedback_style">
-                                    <option value="Brief">Brief</option>
-                                    <option value="Detailed" selected>Detailed</option>
-                                    <option value="Constructive">Constructive</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- RIGHT COLUMN: CHOOSE INPUT METHOD -->
-                <div class="col-xl-6 mt-5 mt-xl-0">
-                    <div class="glass-card h-100">
-                        <h3 class="fw-bold mb-4 border-bottom pb-3 text-primary" style="color: var(--hero-grad-1) !important;">2. Provide Student Data</h3>
-                        
-                        <div class="bg-light p-4 rounded-4 shadow-sm border mb-4">
-                            <h5 class="fw-bold">Option A: Single Student</h5>
-                            <p class="small text-muted mb-2">Paste a single student's answer here for instant evaluation.</p>
-                            <textarea class="form-control" name="student_answer" rows="3" placeholder="Student wrote..."></textarea>
-                        </div>
-
-                        <div class="text-center fw-bold text-muted my-3">— OR —</div>
-
-                        <div class="bg-light p-4 rounded-4 shadow-sm border mb-4">
-                            <h5 class="fw-bold">Option B: Entire Classroom (CSV)</h5>
-                            <p class="small text-muted mb-2">Upload a CSV file. It <strong>must</strong> contain these exact two column headers. Activates the Anti-Cheat Radar.</p>
-                            
-                            <!-- CSV VISUAL EXAMPLE -->
-                            <div class="bg-white p-2 rounded-3 border mb-3">
-                                <table class="table table-sm table-borderless mb-0" style="font-family: monospace; font-size: 0.85em;">
-                                    <thead class="border-bottom border-secondary">
-                                        <tr><th class="text-primary">Student_ID</th><th class="text-success">Student_Answer</th></tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr><td>STU-001</td><td>Noise pollution is caused by airplanes...</td></tr>
-                                        <tr><td>STU-002</td><td>Pesticides in the soil cause...</td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            
-                            <input type="file" class="form-control" name="csv_file" accept=".csv">
-                        </div>
-
-                        <button type="submit" class="btn-custom btn-coral fs-5">🚀 Evaluate Data</button>
-                    </div>
-                </div>
-            </div>
-        </form>
-
-        <!-- ==========================================
-             RESULTS SECTION
-             ========================================== -->
-        <div id="results-anchor"></div>
         
-        {% if single_results or bulk_results %}
-        <div class="glass-card mt-5 border-0 shadow-lg">
-            <h2 class="fw-bold mb-5 text-center">Evaluation Results</h2>
-
-            <!-- SINGLE STUDENT RESULTS -->
-            {% if single_results %}
-            <div class="row align-items-center">
-                <div class="col-md-5 text-center">
-                    <div class="result-box shadow-sm">
-                        <h1 class="display-1 fw-bold mb-0">{{ "%.1f"|format(single_results.awarded_marks) }}</h1>
-                        <h4 class="opacity-75">out of {{ single_results.total_marks }}</h4>
-                        <div class="mt-4 badge-custom fs-5">Semantic Match: {{ single_results.semantic_similarity }}%</div>
-                    </div>
-                </div>
-                <div class="col-md-7 mt-4 mt-md-0">
-                    <div class="bg-light p-4 rounded-4 shadow-sm border mb-3">
-                        <h5 class="fw-bold">✨ AI Feedback</h5>
-                        <p class="mb-0 fs-5">{{ single_results.feedback }}</p>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <div class="bg-light p-3 rounded-4 shadow-sm border h-100">
-                                <strong class="text-success">Concepts Found:</strong><br>
-                                {{ single_results.concepts_found | join(", ") if single_results.concepts_found else "None" }}
-                            </div>
-                        </div>
-                        <div class="col-sm-6 mt-3 mt-sm-0">
-                            <div class="bg-light p-3 rounded-4 shadow-sm border h-100">
-                                <strong class="text-danger">Concepts Missing:</strong><br>
-                                {{ single_results.missing_concepts | join(", ") if single_results.missing_concepts else "None" }}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    {% if single_results.irrelevant_sentences %}
-                    <div class="alert alert-warning mt-3 rounded-4 border-warning border-2">
-                        <strong class="text-dark">⚠️ Fluff Detected:</strong>
-                        <ul class="mb-0 mt-1 text-dark">
-                            {% for fluff in single_results.irrelevant_sentences %}
-                                <li>"{{ fluff }}"</li>
-                            {% endfor %}
+        <div class="accordion mb-4 shadow-sm" id="formatGuideAccordion" style="border-radius: 20px; overflow: hidden;">
+            <div class="accordion-item border-0">
+                <h2 class="accordion-header" id="headingOne">
+                    <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGuide" style="background-color: var(--bg-card); color: var(--text-main);">
+                        💡 Need help formatting your files? Click here for examples!
+                    </button>
+                </h2>
+                <div id="collapseGuide" class="accordion-collapse collapse" data-bs-parent="#formatGuideAccordion">
+                    <div class="accordion-body bg-light">
+                        <ul class="nav nav-pills mb-3" id="formatTabs" role="tablist">
+                            <li class="nav-item" role="presentation"><button class="nav-link active rounded-pill" data-bs-toggle="pill" data-bs-target="#tab-word">Word/PDF/TXT</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link rounded-pill" data-bs-toggle="pill" data-bs-target="#tab-md">Markdown (.md)</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link rounded-pill" data-bs-toggle="pill" data-bs-target="#tab-json">JSON (.json)</button></li>
                         </ul>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-            {% endif %}
+                        
+                        <div class="tab-content bg-white p-4 rounded-4 border shadow-sm" id="formatTabsContent">
+                            
+                            <div class="tab-pane fade show active" id="tab-word">
+                                <p class="text-muted small mb-3">Write naturally. The AI will map the student's messy answers to your structured key automatically.</p>
+                                <div class="row gx-4">
+                                    <div class="col-md-6 border-end">
+                                        <h6 class="fw-bold text-primary">📝 Teacher's Master Key</h6>
+                                        <pre class="mb-0 bg-light p-3 rounded" style="font-family: monospace; font-size: 0.85em;"><strong>Section A: Mandatory</strong>
+Q1: What is photosynthesis? (5 Marks)
+Answer: It is the process where plants use sunlight to make food.
 
-            <!-- BULK CLASS RESULTS -->
-            {% if bulk_results %}
-                {% if bulk_results.flagged_cheaters %}
-                <div class="alert-cheat mb-5 shadow-sm">
-                    <h3 class="fw-bold mb-3 text-dark">⚠️ Suspected Collusion Radar</h3>
-                    <p class="text-dark">The AI detected highly identical semantic structures between these students:</p>
-                    <div class="row">
-                        {% for cheat in bulk_results.flagged_cheaters %}
-                        <div class="col-md-4 mb-2">
-                            <div class="bg-white p-3 rounded-3 shadow-sm text-center border">
-                                <strong class="text-dark">{{ cheat.student1 }}</strong> <span class="text-dark">&</span> <strong class="text-dark">{{ cheat.student2 }}</strong><br>
-                                <span class="fs-5 fw-bold text-danger">{{ cheat.similarity }}% Match</span>
+<strong>Section B: Attempt ONE</strong>
+Q2: Define gravity. (10 Marks)
+Answer: Gravity is the force of attraction...</pre>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="fw-bold text-success">🎓 Student Submission</h6>
+                                        <pre class="mb-0 bg-light p-3 rounded" style="font-family: monospace; font-size: 0.85em;">1. Photosynthesis is how plants use the sun to create their own energy.</pre>
+                                        <small class="text-muted d-block mt-2">Notice how the student didn't need strict tags? They just numbered their answers.</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="tab-md">
+                                <div class="row gx-4">
+                                    <div class="col-md-6 border-end">
+                                        <h6 class="fw-bold text-primary">📝 Teacher's Master Key</h6>
+                                        <pre class="mb-0 bg-light p-3 rounded" style="font-family: monospace; font-size: 0.85em;"># Section 1
+**Q1.** Explain Neural Networks [10 Marks]
+*Key:* Algorithms that mimic the brain.</pre>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="fw-bold text-success">🎓 Student Submission</h6>
+                                        <pre class="mb-0 bg-light p-3 rounded" style="font-family: monospace; font-size: 0.85em;">1. Neural networks are like a digital brain.</pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="tab-json">
+                                <div class="row gx-4">
+                                    <div class="col-md-6 border-end">
+                                        <h6 class="fw-bold text-primary">📝 Teacher's Master Key</h6>
+                                        <pre class="mb-0 bg-light p-3 rounded" style="font-family: monospace; font-size: 0.85em;">{"Q1": {"question": "What is an API?", "marks": 5}}</pre>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="fw-bold text-success">🎓 Student Submission</h6>
+                                        <pre class="mb-0 bg-light p-3 rounded" style="font-family: monospace; font-size: 0.85em;">{"1": "API means application programming interface."}</pre>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-
-                <div class="row align-items-center mb-5">
-                    <div class="col-md-4 text-center">
-                        <h1 class="display-3 fw-bold">{{ bulk_results.total_students }}</h1>
-                        <p class="text-muted fw-bold">Total Graded</p>
-                    </div>
-                    <div class="col-md-4 text-center border-start border-end">
-                        <h1 class="display-3 fw-bold text-success">{{ bulk_results.average_score }} <span class="fs-4 text-muted">/ {{ bulk_results.total_marks }}</span></h1>
-                        <p class="text-muted fw-bold">Class Average</p>
-                    </div>
-                    <div class="col-md-4 text-center mt-4 mt-md-0">
-                        <a href="/download" class="btn-custom btn-yellow shadow-sm">📥 Download CSV</a>
-                    </div>
-                </div>
-                
-                <div class="row gx-5">
-                    <div class="col-md-6 mb-4">
-                        <div class="bg-light p-4 rounded-4 shadow-sm border h-100">
-                            <h5 class="text-center fw-bold mb-4">Grade Distribution</h5>
-                            <canvas id="distChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="col-md-6 mb-4">
-                        <div class="bg-light p-4 rounded-4 shadow-sm border h-100">
-                            <h5 class="text-center fw-bold mb-4">Most Missed Concepts</h5>
-                            {% if bulk_results.concept_labels|length > 0 %}
-                                <canvas id="conceptChart"></canvas>
-                            {% else %}
-                                <div class="h-100 d-flex align-items-center justify-content-center">
-                                    <h4 class="text-success text-center">Perfect! No key concepts were missed.</h4>
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-
-                <script>
-                    const ctxDist = document.getElementById('distChart');
-                    new Chart(ctxDist, {
-                        type: 'bar',
-                        data: {
-                            labels: {{ bulk_results.dist_labels | tojson }},
-                            datasets: [{
-                                label: 'Students',
-                                data: {{ bulk_results.dist_data | tojson }},
-                                backgroundColor: '#B9CEFF', 
-                                borderRadius: 8
-                            }]
-                        },
-                        options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
-                    });
-
-                    if ({{ bulk_results.concept_labels | tojson }}.length > 0) {
-                        const ctxConcept = document.getElementById('conceptChart');
-                        new Chart(ctxConcept, {
-                            type: 'bar',
-                            data: {
-                                labels: {{ bulk_results.concept_labels | tojson }},
-                                datasets: [{
-                                    label: 'Times Missed',
-                                    data: {{ bulk_results.concept_data | tojson }},
-                                    backgroundColor: '#FFC7B9', 
-                                    borderRadius: 8
-                                }]
-                            },
-                            options: { indexAxis: 'y', scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } } }
-                        });
-                    }
-                </script>
-            {% endif %}
-        </div>
-        {% endif %}
-
-        <!-- ==========================================
-             MULTI-QUESTION EXAM GRADER
-             ========================================== -->
-        <div class="glass-card mb-5 mt-5 shadow-sm" style="margin-top: 100px !important;">
-            <h3 class="fw-bold mb-3 border-bottom pb-3">3. Multi-Question Exam Grader</h3>
-            <p class="text-muted mb-4 fs-5">Grade entire multi-page Word (<code>.docx</code>) or PDF exams at once. To help the AI read the document, simply use <code>[Q1]</code> tags to separate questions and <code>[A1]</code> for answers.</p>
-            
-            <!-- THE VISUAL EXAMPLES -->
-            <div class="row mb-5">
-                <div class="col-md-6">
-                    <div class="bg-light p-4 rounded-4 border h-100 border-success border-opacity-50">
-                        <h6 class="fw-bold text-success mb-3">📄 Master Key Format Example</h6>
-                        <pre class="mb-0 text-dark" style="font-family: monospace; font-size: 0.9em;"><strong>[Q1]</strong> What is photosynthesis?
-<strong>[A1]</strong> Photosynthesis converts light to energy.
-<strong>{Marks: 5}</strong>
-<strong>{Concepts: sunlight, chemical energy}</strong>
-
-<strong>[Q2]</strong> What is gravity?
-<strong>[A2]</strong> Gravity is the force of attraction...
-<strong>{Marks: 10}</strong></pre>
-                    </div>
-                </div>
-                <div class="col-md-6 mt-3 mt-md-0">
-                    <div class="bg-light p-4 rounded-4 border h-100 border-primary border-opacity-50">
-                        <h6 class="fw-bold text-primary mb-3">📝 Student Exam Format Example</h6>
-                        <pre class="mb-0 text-dark" style="font-family: monospace; font-size: 0.9em;"><strong>[A1]</strong> 
-Plants use the sun to make their own food and energy.
-
-<strong>[A2]</strong> 
-Gravity pulls objects towards the center of the earth.</pre>
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div class="glass-card">
+            <h3 class="fw-bold mb-4 border-bottom pb-3">Evaluate Exam</h3>
             
-            <form method="POST" action="/exam" enctype="multipart/form-data" class="d-flex gap-3 flex-column flex-md-row bg-light p-4 rounded-4 border">
-                <div class="w-100">
-                    <label class="form-label fw-bold">Master Key (Docx/PDF)</label>
-                    <input type="file" class="form-control" name="teacher_doc" accept=".docx,.pdf" required>
+            <div id="error-alert" class="alert alert-danger d-none fw-bold shadow-sm" role="alert"></div>
+
+            <form action="/grade_exam" method="POST" enctype="multipart/form-data" id="examForm">
+                
+                <div class="row gx-5 mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fs-5">1. Teacher's Master Key</label>
+                        <div class="input-group">
+                            <input type="file" class="form-control" name="teacher_doc" id="teacherDoc" accept=".pdf,.docx,.txt,.md,.json" required>
+                            <button class="btn btn-outline-danger px-3" type="button" onclick="clearInput('teacherDoc')" style="border-radius: 0 15px 15px 0;">✖ Remove</button>
+                        </div>
+                        <div id="teacherFeedback" class="small mt-2 fw-bold"></div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fs-5">2. Student Submission</label>
+                        <div class="input-group">
+                            <input type="file" class="form-control" name="student_doc" id="studentDoc" accept=".pdf,.docx,.txt,.md,.json" required>
+                            <button class="btn btn-outline-danger px-3" type="button" onclick="clearInput('studentDoc')" style="border-radius: 0 15px 15px 0;">✖ Remove</button>
+                        </div>
+                        <div id="studentFeedback" class="small mt-2 fw-bold"></div>
+                    </div>
                 </div>
-                <div class="w-100">
-                    <label class="form-label fw-bold">Student Submission</label>
-                    <input type="file" class="form-control" name="student_doc" accept=".docx,.pdf" required>
+
+                <div class="row gx-5 mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Grading Strictness</label>
+                        <select class="form-select" name="strictness">
+                            <option value="Lenient">Lenient (Benefit of the doubt)</option>
+                            <option value="Normal" selected>Normal (Standard grading)</option>
+                            <option value="Strict">Strict (Requires exact concepts)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Feedback Style</label>
+                        <select class="form-select" name="feedback_style">
+                            <option value="Brief and direct">Brief & Direct</option>
+                            <option value="Detailed and constructive" selected>Detailed & Constructive</option>
+                            <option value="Encouraging and supportive">Encouraging</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="d-flex align-items-end" style="min-width: 200px;">
-                    <button type="submit" class="btn-custom btn-yellow" style="height: 58px;">Grade Exam</button>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn-custom fs-5">🚀 Evaluate Exam</button>
                 </div>
             </form>
+        </div>
 
-            {% if exam_report %}
-            <div class="bg-light p-4 rounded-4 shadow-sm border mt-5 text-center">
-                <h4 class="text-muted fw-bold">Final Exam Score</h4>
-                <h1 class="display-3 fw-bold">{{ exam_report.total_awarded }} <span class="fs-4 text-muted">/ {{ exam_report.total_possible }}</span></h1>
-                <span class="badge-custom fs-5">{{ exam_report.percentage }}%</span>
-                
-                <hr class="my-4">
-                <h5 class="fw-bold mb-3 text-start">Question Breakdown</h5>
-                {% for q in exam_report.question_breakdown %}
-                    <div class="mb-3 p-3 bg-white border rounded-3 text-start border-start border-4 border-success">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <strong class="fs-5">{{ q.question_id }}</strong> 
-                            <span class="text-success fw-bold fs-5">{{ q.awarded_marks }} / {{ q.total_marks }} pts</span>
-                        </div>
-                        <p class="mb-1"><strong>AI Feedback:</strong> {{ q.feedback }}</p>
-                        <small class="text-muted fw-bold">Semantic Match: {{ q.semantic_similarity }}%</small>
+        {% if exam_report %}
+        <div class="glass-card mb-5" id="results-section">
+            <h2 class="fw-bold mb-5 text-center">Evaluation Results</h2>
+            
+            <div class="row text-center mb-5 gx-4">
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <p class="text-muted fw-bold mb-1">Total Score</p>
+                        <h1 class="display-5 fw-bold" style="color: var(--text-main);">{{ exam_report.total_awarded }} <span class="fs-4 text-muted">/ {{ exam_report.total_possible }}</span></h1>
                     </div>
+                </div>
+                <div class="col-md-4 mt-3 mt-md-0">
+                    <div class="stat-card" style="border-color: #4A7A4A; background-color: rgba(74, 122, 74, 0.1);">
+                        <p class="text-muted fw-bold mb-1">Percentage</p>
+                        <h1 class="display-5 fw-bold text-success">{{ exam_report.percentage }}%</h1>
+                    </div>
+                </div>
+                <div class="col-md-4 mt-3 mt-md-0">
+                    <div class="stat-card">
+                        <p class="text-muted fw-bold mb-1">Questions Graded</p>
+                        <h1 class="display-5 fw-bold" style="color: var(--text-main);">{{ exam_report.question_breakdown | length }}</h1>
+                    </div>
+                </div>
+            </div>
+
+            <h4 class="mb-3 fw-bold border-bottom pb-2">🤖 AI's Understood Master Key</h4>
+            <p class="text-muted small mb-4">This is how the AI interpreted your uploaded Master Key. It used these exact concepts to grade the student's submission.</p>
+            
+            <div class="row mb-5">
+                {% for rule in exam_report.extracted_rubric %}
+                <div class="col-md-6 mb-3">
+                    <div class="p-3 rounded h-100" style="background-color: var(--bg-input); border: 1px solid var(--border-color);">
+                        <div class="d-flex justify-content-between mb-2">
+                            <strong class="text-primary">{{ rule.question_id }}</strong>
+                            <span class="badge bg-secondary">{{ rule.marks_available }} Marks</span>
+                        </div>
+                        <div class="small" style="color: var(--text-main);">
+                            <strong>Looking for:</strong> {{ rule.expected_concepts }}
+                        </div>
+                    </div>
+                </div>
                 {% endfor %}
             </div>
-            {% endif %}
+
+            <h4 class="mb-4 fw-bold border-bottom pb-2">📝 Student's Detailed Evaluation</h4>
+            
+            {% for q in exam_report.question_breakdown %}
+            <div class="p-4 rounded-4 shadow-sm border mb-4" style="background-color: var(--bg-card);">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 border-bottom pb-3">
+                    <h5 class="mb-2 mb-md-0 fw-bold text-primary">{{ q.question_id }}</h5>
+                    <div>
+                        <span class="fs-5 fw-bold me-3" style="color: var(--text-main);">{{ q.awarded_marks }} / {{ q.total_marks }} pts</span>
+                        <span class="badge-custom">Semantic Match: {{ q.semantic_similarity }}%</span>
+                    </div>
+                </div>
+                
+                <div class="feedback-box">
+                    <strong>✨ AI Feedback:</strong>
+                    <p class="mb-0 mt-2">{{ q.feedback }}</p>
+                </div>
+            </div>
+            {% endfor %}
+            
         </div>
+        
+        <script>
+            document.getElementById('results-section').scrollIntoView({behavior: "smooth"});
+        </script>
+        {% endif %}
 
     </div>
 
-    <!-- SCRIPT FOR REVERSE AI & THEME SWITCHER -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
-        // 1. Theme Switcher Logic
-        function setTheme(themeName) {
-            document.body.classList.remove('theme-dark', 'theme-colorful');
-            if (themeName !== 'default') {
-                document.body.classList.add('theme-' + themeName);
-            }
-            localStorage.setItem('evaluatorTheme', themeName);
+        // --- THEME TOGGLE LOGIC ---
+        const themeToggleBtn = document.getElementById('themeToggle');
+        if (localStorage.getItem('evaluatorTheme') === 'dark') {
+            document.body.classList.add('theme-dark');
+            themeToggleBtn.innerText = '☀️ Light Mode';
+            themeToggleBtn.classList.replace('btn-dark', 'btn-light');
         }
 
-        window.onload = () => {
-            const savedTheme = localStorage.getItem('evaluatorTheme');
-            if (savedTheme) { setTheme(savedTheme); }
-        };
+        themeToggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('theme-dark');
+            const isDark = document.body.classList.contains('theme-dark');
+            localStorage.setItem('evaluatorTheme', isDark ? 'dark' : 'light');
+            themeToggleBtn.innerText = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+            themeToggleBtn.classList.toggle('btn-dark', !isDark);
+            themeToggleBtn.classList.toggle('btn-light', isDark);
+        });
 
-        // 2. Reverse AI Logic
-        async function generateRubric() {
-            const text = document.getElementById('sourceText').value;
-            if (!text) return alert("Please paste some text first!");
+        // --- VALIDATION LOGIC ---
+        function clearInput(inputId) {
+            document.getElementById(inputId).value = '';
+            const feedbackDiv = document.getElementById(inputId === 'teacherDoc' ? 'teacherFeedback' : 'studentFeedback');
+            feedbackDiv.innerHTML = '';
+            feedbackDiv.className = 'small mt-2 fw-bold';
+        }
+
+        async function validateFile(event, role, feedbackId) {
+            const file = event.target.files[0];
+            const feedbackDiv = document.getElementById(feedbackId);
+            if (!file) return;
+            feedbackDiv.innerHTML = '<span class="text-muted">⏳ Checking format...</span>';
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("role", role);
+            try {
+                const response = await fetch('/validate_file', { method: 'POST', body: formData });
+                const result = await response.json();
+                feedbackDiv.className = `small mt-2 fw-bold text-${result.status === 'error' ? 'danger' : result.status === 'warning' ? 'warning' : 'success'}`;
+                feedbackDiv.innerText = result.message;
+            } catch (error) {
+                feedbackDiv.innerHTML = '<span class="text-danger">Error checking file.</span>';
+            }
+        }
+
+        document.getElementById('teacherDoc').addEventListener('change', (e) => validateFile(e, 'teacher', 'teacherFeedback'));
+        document.getElementById('studentDoc').addEventListener('change', (e) => validateFile(e, 'student', 'studentFeedback'));
+
+        // --- SUBMISSION & ABORT LOGIC ---
+        let abortController = null;
+
+        document.getElementById('examForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); 
+            const errorAlert = document.getElementById('error-alert');
+            errorAlert.classList.add('d-none');
             
-            const btn = document.getElementById('genRubricBtn');
-            btn.innerText = "⏳ Generating...";
-            btn.disabled = true;
+            const isDark = document.body.classList.contains('theme-dark');
+            document.getElementById('loading-overlay').style.background = isDark ? 'rgba(30, 30, 30, 0.85)' : 'rgba(255, 255, 255, 0.85)';
+            document.getElementById('loading-overlay').classList.remove('d-none');
+            
+            abortController = new AbortController();
+            const formData = new FormData(this);
 
             try {
-                const res = await fetch('/auto-rubric', {
+                const response = await fetch('/grade_exam', {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({source_text: text})
+                    body: formData,
+                    signal: abortController.signal
                 });
-                const data = await res.json();
-                
-                document.getElementById('master_teacher_answer').value = data.model_answer;
-                document.getElementById('master_concepts').value = data.key_concepts;
-                
-                btn.innerText = "✅ Populated Below!";
-                setTimeout(() => { btn.innerText = "Extract Knowledge & Generate Rubric"; }, 3000);
-            } catch (err) {
-                alert("Error generating rubric. Check server.");
-                btn.innerText = "Extract Knowledge & Generate Rubric";
-            } finally {
-                btn.disabled = false;
-            }
-        }
-    </script>
 
-    {% if single_results or bulk_results or exam_report %}
-        <script>document.getElementById('results-anchor').scrollIntoView({behavior: "smooth"});</script>
-    {% endif %}
+                if (!response.ok) throw new Error(`Server Error: ${response.status}`);
+                const htmlText = await response.text();
+                document.open();
+                document.write(htmlText);
+                document.close();
+
+            } catch (error) {
+                document.getElementById('loading-overlay').classList.add('d-none');
+                errorAlert.classList.remove('d-none');
+                errorAlert.innerText = error.name === 'AbortError' ? "🛑 Evaluation cancelled." : "⚠️ Network/AI Error. Please try again.";
+            }
+        });
+
+        function cancelEvaluation() { if (abortController) abortController.abort(); }
+    </script>
 </body>
 </html>
