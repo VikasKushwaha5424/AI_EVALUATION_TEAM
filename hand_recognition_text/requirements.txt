@@ -1,0 +1,10 @@
+gradio
+qwen-vl-utils
+opencv-python
+numpy>=1.26
+Pillow>=10.0
+Requests>=2.31
+torch
+torchvision
+transformers>=4.45.0
+accelerate

@@ -76,30 +76,42 @@ def grade_entire_exam(teacher_text, student_text, strictness="Normal", feedback_
     }}
     """
     
-    try:
-        # Wait if we are hitting API rate limits
-        gemini_limiter.wait_if_needed()
+    MODELS = ['gemini-2.0-flash', 'gemini-1.5-flash']
+    
+    for model in MODELS:
+        try:
+            # Wait if we are hitting API rate limits
+            gemini_limiter.wait_if_needed()
+            
+            print(f"Grading with {model}...")
+            response = client.models.generate_content(
+                model=model,
+                contents=prompt
+            )
+            
+            # Clean the response to ensure it is pure JSON
+            raw_text = response.text.replace('```json', '').replace('```', '').strip()
+            result_dict = json.loads(raw_text)
+            
+            return result_dict
         
-        # Call the Gemini 2.5 Flash model
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=prompt
-        )
-        
-        # Clean the response to ensure it is pure JSON (strip markdown blocks if the AI sneaks them in)
-        raw_text = response.text.replace('```json', '').replace('```', '').strip()
-        result_dict = json.loads(raw_text)
-        
-        return result_dict
-        
-    except Exception as e:
-        print(f"Error calling Gemini: {e}")
-        return {
-            "total_awarded": 0, "total_possible": 0, "percentage": 0,
-            "extracted_rubric": [],
-            "question_breakdown": [{
-                "question_id": "System Error",
-                "awarded_marks": 0, "total_marks": 0, "semantic_similarity": 0,
-                "feedback": "Error connecting to AI or parsing the exam structure. Ensure the documents contain readable text."
-            }]
-        }
+        except Exception as e:
+            err_str = str(e)
+            if '429' in err_str or 'RESOURCE_EXHAUSTED' in err_str:
+                print(f"⚠️ {model} quota exhausted. Trying next model...")
+                continue
+            else:
+                print(f"Error with {model}: {e}")
+                continue
+    
+    # All models failed
+    print("All Gemini models exhausted or failed.")
+    return {
+        "total_awarded": 0, "total_possible": 0, "percentage": 0,
+        "extracted_rubric": [],
+        "question_breakdown": [{
+            "question_id": "System Error",
+            "awarded_marks": 0, "total_marks": 0, "semantic_similarity": 0,
+            "feedback": "All AI models are currently rate-limited. Please wait a few minutes and try again."
+        }]
+    }

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GITAM Evaluator — {{ bundle.code }} Bundle</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="main-navbar">
+        <div style="display:flex;align-items:center;gap:20px;">
+            <a href="/dashboard" class="navbar-brand">
+                <div class="brand-icon">🎓</div>
+                <span>GITAM</span>
+            </a>
+            <a href="/dashboard" class="navbar-nav-item">🏠 Home</a>
+        </div>
+        <div class="navbar-right">
+            <span class="navbar-nav-item">{{ lecturer_id }} ▾</span>
+            <a href="/logout" class="btn-logout">Logout 🚪</a>
+        </div>
+    </nav>
+
+    <!-- BUNDLE HEADER -->
+    <div class="bundle-header">
+        <div>
+            <h2>{{ bundle.code }} — {{ bundle.name }}</h2>
+            <p>{{ bundle.exam_type }} &nbsp;|&nbsp; {{ bundle.exam_date }} &nbsp;|&nbsp; Total Marks: {{ bundle.total_marks }}</p>
+        </div>
+        <a href="/dashboard" class="btn-back">← Back to Dashboard</a>
+    </div>
+
+    <!-- UPLOAD SECTION -->
+    <div class="upload-section">
+        <h4>📤 Upload Documents for this Bundle</h4>
+        <form id="uploadForm" enctype="multipart/form-data" style="margin:0;">
+            <div class="upload-row">
+                <div class="upload-group">
+                    <label>Answer Key / Evaluation Key (PDF, DOCX, TXT)</label>
+                    <input type="file" id="keyFile" accept=".pdf,.docx,.txt,.md,.json">
+                </div>
+                <div class="upload-group">
+                    <label>Student Answer Sheet (PDF, DOCX, TXT)</label>
+                    <input type="file" id="answerFile" accept=".pdf,.docx,.txt,.md,.json">
+                </div>
+                <button type="button" class="btn-upload" onclick="uploadFiles()">📁 Upload Files</button>
+            </div>
+            <div id="uploadStatus" style="margin-top:10px;font-size:0.82rem;font-weight:600;"></div>
+        </form>
+    </div>
+
+    <!-- STUDENTS TABLE -->
+    <div class="students-table-wrapper">
+        <table class="students-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Student Name</th>
+                    <th>Registration No</th>
+                    <th>Status</th>
+                    <th>Marks</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in bundle.students %}
+                <tr class="clickable" onclick="window.location='/evaluate/{{ bundle.id }}/{{ student.id }}'">
+                    <td>{{ loop.index }}</td>
+                    <td style="font-weight:600;">{{ student.name }}</td>
+                    <td>{{ student.reg_no }}</td>
+                    <td>
+                        <span class="status-badge {{ 'evaluated' if student.evaluated else 'pending' }}">
+                            {{ '✅ Evaluated' if student.evaluated else '⏳ Pending' }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if student.evaluated %}
+                            <strong>{{ student.marks_obtained }}/{{ bundle.total_marks }}</strong>
+                        {% else %}
+                            <span style="color:#9E9E9E;">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="/evaluate/{{ bundle.id }}/{{ student.id }}" class="btn-open-bundle" style="font-size:0.75rem;padding:6px 14px;">
+                            📝 Evaluate
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script>
+        async function uploadFiles() {
+            const statusDiv = document.getElementById('uploadStatus');
+            const keyFile = document.getElementById('keyFile').files[0];
+            const answerFile = document.getElementById('answerFile').files[0];
+
+            if (!keyFile && !answerFile) {
+                statusDiv.innerHTML = '<span style="color:#C62828;">⚠️ Please select at least one file to upload.</span>';
+                return;
+            }
+
+            const formData = new FormData();
+            if (keyFile) formData.append('key_file', keyFile);
+            if (answerFile) formData.append('answer_file', answerFile);
+            formData.append('bundle_id', '{{ bundle.id }}');
+
+            statusDiv.innerHTML = '<span style="color:#1565C0;">⏳ Uploading files...</span>';
+
+            try {
+                const res = await fetch('/upload_files', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    statusDiv.innerHTML = '<span style="color:#2E7D32;">✅ ' + data.message + '</span>';
+                    showToast('Files uploaded successfully!');
+                } else {
+                    statusDiv.innerHTML = '<span style="color:#C62828;">❌ ' + data.message + '</span>';
+                }
+            } catch(e) {
+                statusDiv.innerHTML = '<span style="color:#C62828;">❌ Upload failed. Please try again.</span>';
+            }
+        }
+
+        function showToast(msg, isError = false) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast-msg' + (isError ? ' error' : '');
+            toast.textContent = msg;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+    </script>
+
+</body>
+</html>

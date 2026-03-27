@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GITAM Evaluator — Evaluate {{ student.name }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="main-navbar">
+        <div style="display:flex;align-items:center;gap:20px;">
+            <a href="/dashboard" class="navbar-brand">
+                <div class="brand-icon">🎓</div>
+                <span>GITAM</span>
+            </a>
+            <a href="/bundle/{{ bundle.id }}" class="navbar-nav-item">← Back to Bundle</a>
+        </div>
+        <div class="navbar-right">
+            <span class="navbar-nav-item" style="color:#4DB6AC;font-weight:700;">
+                {{ bundle.code }} — {{ student.name }} ({{ student.reg_no }})
+            </span>
+            <a href="/logout" class="btn-logout">Logout 🚪</a>
+        </div>
+    </nav>
+
+    <!-- AI LOADING OVERLAY (hidden by default) -->
+    <div id="aiLoading" class="ai-loading-overlay" style="display:none;">
+        <div class="ai-loading-card">
+            <div class="spinner"></div>
+            <h3>🧠 AI is Evaluating...</h3>
+            <p>Gemini is comparing the answer sheet against the evaluation key. This usually takes 10-20 seconds.</p>
+        </div>
+    </div>
+
+    <!-- SPLIT SCREEN -->
+    <div class="eval-container">
+
+        <!-- LEFT: Student Answer Sheet -->
+        <div class="eval-left">
+            <div class="eval-panel-header">
+                <h3>📄 Student's Answer Sheet</h3>
+                <span class="student-info">{{ student.name }} — {{ student.reg_no }}</span>
+            </div>
+
+            <!-- Upload answer sheet if not present -->
+            <div style="padding:10px 20px;background:#FFF;border-bottom:1px solid #E0E0E0;flex-shrink:0;">
+                <form id="answerUploadForm" style="display:flex;gap:10px;align-items:center;">
+                    <input type="file" id="studentAnswerFile" accept=".pdf,.docx,.txt,.md,.json" style="flex:1;font-size:0.82rem;">
+                    <button type="button" class="btn-upload" style="padding:8px 16px;font-size:0.8rem;" onclick="uploadStudentAnswer()">📤 Upload</button>
+                </form>
+                <div id="answerUploadStatus" style="font-size:0.78rem;margin-top:4px;"></div>
+            </div>
+
+            <div class="eval-panel-body">
+                {% if student_text %}
+                <div class="document-viewer" id="studentDocViewer">{{ student_text }}</div>
+                {% else %}
+                <div class="document-placeholder" id="studentDocPlaceholder">
+                    <div class="placeholder-icon">📄</div>
+                    <p>No answer sheet uploaded yet.<br>Upload a PDF/DOCX above to view it here.</p>
+                </div>
+                <div class="document-viewer" id="studentDocViewer" style="display:none;"></div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- RIGHT: Key + Marks -->
+        <div class="eval-right">
+
+            <!-- RIGHT TOP: Evaluation Key -->
+            <div class="eval-right-top">
+                <div class="eval-panel-header">
+                    <h3>🔑 Evaluation Key</h3>
+                </div>
+
+                <!-- Upload key if not present -->
+                <div style="padding:10px 20px;background:#FFF;border-bottom:1px solid #E0E0E0;">
+                    <form id="keyUploadForm" style="display:flex;gap:10px;align-items:center;">
+                        <input type="file" id="evalKeyFile" accept=".pdf,.docx,.txt,.md,.json" style="flex:1;font-size:0.82rem;">
+                        <button type="button" class="btn-upload" style="padding:8px 16px;font-size:0.8rem;" onclick="uploadEvalKey()">📤 Upload</button>
+                    </form>
+                    <div id="keyUploadStatus" style="font-size:0.78rem;margin-top:4px;"></div>
+                </div>
+
+                <div class="eval-panel-body">
+                    {% if key_text %}
+                    <div class="document-viewer" id="keyDocViewer">{{ key_text }}</div>
+                    {% else %}
+                    <div class="document-placeholder" id="keyDocPlaceholder">
+                        <div class="placeholder-icon">🔑</div>
+                        <p>No evaluation key uploaded.<br>Upload a PDF/DOCX above.</p>
+                    </div>
+                    <div class="document-viewer" id="keyDocViewer" style="display:none;"></div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- RIGHT BOTTOM: Marks Panel -->
+            <div class="eval-right-bottom">
+                <div class="marks-panel">
+                    <h3>📊 Marks & AI Evaluation</h3>
+
+                    {% if not ai_result %}
+                    <div id="noResultMsg" style="text-align:center;padding:20px;color:#9E9E9E;">
+                        <p>Upload both the <strong>answer sheet</strong> and <strong>evaluation key</strong>, then click the button below to run AI evaluation.</p>
+                        <button type="button" class="btn-save-marks" style="max-width:300px;margin:16px auto;" onclick="triggerAIEvaluation()">
+                            🤖 Run AI Evaluation
+                        </button>
+                    </div>
+                    {% endif %}
+
+                    <div id="marksContainer" style="{{ 'display:none;' if not ai_result else '' }}">
+                        <table class="marks-table" id="marksTable">
+                            <thead>
+                                <tr>
+                                    <th>Question</th>
+                                    <th>Max Marks</th>
+                                    <th>AI Marks</th>
+                                    <th>Your Marks</th>
+                                    <th>Similarity</th>
+                                    <th>AI Feedback</th>
+                                </tr>
+                            </thead>
+                            <tbody id="marksBody">
+                                {% if ai_result %}
+                                {% for q in ai_result.question_breakdown %}
+                                <tr>
+                                    <td style="font-weight:700;">{{ q.question_id }}</td>
+                                    <td>{{ q.total_marks }}</td>
+                                    <td class="ai-marks">{{ q.awarded_marks }}</td>
+                                    <td>
+                                        <input type="number" class="lecturer-mark" min="0" max="{{ q.total_marks }}"
+                                               value="{{ q.awarded_marks }}" data-max="{{ q.total_marks }}"
+                                               onchange="recalcTotal()">
+                                    </td>
+                                    <td>{{ q.semantic_similarity }}%</td>
+                                    <td><div class="feedback-text">{{ q.feedback }}</div></td>
+                                </tr>
+                                {% endfor %}
+                                <tr class="marks-total-row">
+                                    <td colspan="2">TOTAL</td>
+                                    <td class="ai-marks">{{ ai_result.total_awarded }} / {{ ai_result.total_possible }}</td>
+                                    <td id="lecturerTotal">{{ ai_result.total_awarded }}</td>
+                                    <td>{{ ai_result.percentage }}%</td>
+                                    <td></td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+
+                        <button type="button" class="btn-save-marks" onclick="saveMarks()">
+                            💾 Save Final Marks
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script>
+        const bundleId = "{{ bundle.id }}";
+        const studentId = "{{ student.id }}";
+
+        /* ---------- FILE UPLOADS ---------- */
+        async function uploadStudentAnswer() {
+            const file = document.getElementById('studentAnswerFile').files[0];
+            const status = document.getElementById('answerUploadStatus');
+            if (!file) { status.innerHTML = '<span style="color:#C62828;">Select a file first.</span>'; return; }
+
+            const fd = new FormData();
+            fd.append('file', file);
+            fd.append('bundle_id', bundleId);
+            fd.append('student_id', studentId);
+            fd.append('type', 'answer');
+
+            status.innerHTML = '<span style="color:#1565C0;">⏳ Uploading...</span>';
+            try {
+                const res = await fetch('/upload_single', { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    status.innerHTML = '<span style="color:#2E7D32;">✅ Uploaded!</span>';
+                    document.getElementById('studentDocViewer').textContent = data.text;
+                    document.getElementById('studentDocViewer').style.display = 'block';
+                    const ph = document.getElementById('studentDocPlaceholder');
+                    if (ph) ph.style.display = 'none';
+                } else {
+                    status.innerHTML = '<span style="color:#C62828;">❌ ' + data.message + '</span>';
+                }
+            } catch(e) {
+                status.innerHTML = '<span style="color:#C62828;">❌ Upload failed.</span>';
+            }
+        }
+
+        async function uploadEvalKey() {
+            const file = document.getElementById('evalKeyFile').files[0];
+            const status = document.getElementById('keyUploadStatus');
+            if (!file) { status.innerHTML = '<span style="color:#C62828;">Select a file first.</span>'; return; }
+
+            const fd = new FormData();
+            fd.append('file', file);
+            fd.append('bundle_id', bundleId);
+            fd.append('type', 'key');
+
+            status.innerHTML = '<span style="color:#1565C0;">⏳ Uploading...</span>';
+            try {
+                const res = await fetch('/upload_single', { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    status.innerHTML = '<span style="color:#2E7D32;">✅ Uploaded!</span>';
+                    document.getElementById('keyDocViewer').textContent = data.text;
+                    document.getElementById('keyDocViewer').style.display = 'block';
+                    const ph = document.getElementById('keyDocPlaceholder');
+                    if (ph) ph.style.display = 'none';
+                } else {
+                    status.innerHTML = '<span style="color:#C62828;">❌ ' + data.message + '</span>';
+                }
+            } catch(e) {
+                status.innerHTML = '<span style="color:#C62828;">❌ Upload failed.</span>';
+            }
+        }
+
+        /* ---------- AI EVALUATION ---------- */
+        async function triggerAIEvaluation() {
+            const studentText = document.getElementById('studentDocViewer').textContent.trim();
+            const keyText = document.getElementById('keyDocViewer').textContent.trim();
+
+            if (!studentText || studentText.includes('No answer sheet')) {
+                showToast('Please upload the student answer sheet first.', true);
+                return;
+            }
+            if (!keyText || keyText.includes('No evaluation key')) {
+                showToast('Please upload the evaluation key first.', true);
+                return;
+            }
+
+            document.getElementById('aiLoading').style.display = 'flex';
+
+            try {
+                const res = await fetch('/ai_evaluate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        bundle_id: bundleId,
+                        student_id: studentId
+                    })
+                });
+                const data = await res.json();
+                document.getElementById('aiLoading').style.display = 'none';
+
+                if (data.status === 'error') {
+                    showToast(data.message, true);
+                    return;
+                }
+
+                renderMarks(data);
+
+            } catch(e) {
+                document.getElementById('aiLoading').style.display = 'none';
+                showToast('AI evaluation failed. Check console.', true);
+                console.error(e);
+            }
+        }
+
+        function renderMarks(result) {
+            const tbody = document.getElementById('marksBody');
+            tbody.innerHTML = '';
+
+            let totalAwarded = 0;
+            let totalPossible = 0;
+
+            result.question_breakdown.forEach(q => {
+                totalAwarded += q.awarded_marks;
+                totalPossible += q.total_marks;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-weight:700;">${q.question_id}</td>
+                    <td>${q.total_marks}</td>
+                    <td class="ai-marks">${q.awarded_marks}</td>
+                    <td>
+                        <input type="number" class="lecturer-mark" min="0" max="${q.total_marks}"
+                               value="${q.awarded_marks}" data-max="${q.total_marks}"
+                               onchange="recalcTotal()">
+                    </td>
+                    <td>${q.semantic_similarity}%</td>
+                    <td><div class="feedback-text">${q.feedback}</div></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            const totalTr = document.createElement('tr');
+            totalTr.className = 'marks-total-row';
+            totalTr.innerHTML = `
+                <td colspan="2">TOTAL</td>
+                <td class="ai-marks">${totalAwarded} / ${totalPossible}</td>
+                <td id="lecturerTotal">${totalAwarded}</td>
+                <td>${result.percentage}%</td>
+                <td></td>
+            `;
+            tbody.appendChild(totalTr);
+
+            document.getElementById('marksContainer').style.display = 'block';
+            const noMsg = document.getElementById('noResultMsg');
+            if (noMsg) noMsg.style.display = 'none';
+
+            showToast('AI Evaluation complete! Review and adjust marks below.');
+        }
+
+        /* ---------- MARKS MANAGEMENT ---------- */
+        function recalcTotal() {
+            const inputs = document.querySelectorAll('.lecturer-mark');
+            let total = 0;
+            inputs.forEach(inp => {
+                let val = parseFloat(inp.value) || 0;
+                const max = parseFloat(inp.dataset.max) || 0;
+                if (val > max) { val = max; inp.value = max; }
+                if (val < 0) { val = 0; inp.value = 0; }
+                total += val;
+            });
+            const totalEl = document.getElementById('lecturerTotal');
+            if (totalEl) totalEl.textContent = total;
+        }
+
+        async function saveMarks() {
+            const inputs = document.querySelectorAll('.lecturer-mark');
+            const marks = [];
+            inputs.forEach(inp => marks.push(parseFloat(inp.value) || 0));
+            const total = marks.reduce((a, b) => a + b, 0);
+
+            try {
+                const res = await fetch('/save_marks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        bundle_id: bundleId,
+                        student_id: studentId,
+                        marks: marks,
+                        total: total
+                    })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    showToast('✅ Marks saved successfully!');
+                } else {
+                    showToast('Error saving marks.', true);
+                }
+            } catch(e) {
+                showToast('Failed to save marks.', true);
+            }
+        }
+
+        /* ---------- TOAST ---------- */
+        function showToast(msg, isError = false) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast-msg' + (isError ? ' error' : '');
+            toast.textContent = msg;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        /* ---------- AUTO-TRIGGER AI on page load if both docs exist ---------- */
+        window.addEventListener('DOMContentLoaded', () => {
+            const studentViewer = document.getElementById('studentDocViewer');
+            const keyViewer = document.getElementById('keyDocViewer');
+            const marksContainer = document.getElementById('marksContainer');
+
+            const hasStudent = studentViewer && studentViewer.style.display !== 'none' && studentViewer.textContent.trim().length > 10;
+            const hasKey = keyViewer && keyViewer.style.display !== 'none' && keyViewer.textContent.trim().length > 10;
+            const alreadyHasMarks = marksContainer && marksContainer.style.display !== 'none' && marksContainer.querySelector('.lecturer-mark');
+
+            if (hasStudent && hasKey && !alreadyHasMarks) {
+                triggerAIEvaluation();
+            }
+        });
+    </script>
+
+</body>
+</html>
