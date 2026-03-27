@@ -6,8 +6,9 @@ import json
 import uuid
 import copy
 
-from document_parser import extract_text_from_file
-from llm_engine import grade_entire_exam
+from core.document_parser import extract_text_from_file
+from core.llm_engine import grade_entire_exam
+from core.handwriting_engine import extract_handwriting
 
 app = Flask(__name__)
 app.secret_key = 'gitam-auto-evaluator-2026-secret'
@@ -16,7 +17,7 @@ app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-ALLOWED_EXTENSIONS = {'pdf', 'docx', 'txt', 'md', 'json'}
+ALLOWED_EXTENSIONS = {'pdf', 'docx', 'txt', 'md', 'json', 'jpg', 'jpeg', 'png'}
 
 # ============================================================
 # DEMO CREDENTIALS
@@ -243,7 +244,14 @@ def upload_files():
     if key_file and allowed_file(key_file.filename):
         temp_path = os.path.join(tempfile.gettempdir(), f"{uuid.uuid4()}_{key_file.filename}")
         key_file.save(temp_path)
-        text = extract_text_from_file(temp_path, key_file.filename)
+        
+        # Check if it's an image for handwriting engine
+        ext = key_file.filename.rsplit('.', 1)[1].lower()
+        if ext in ['jpg', 'jpeg', 'png']:
+            text = extract_handwriting(temp_path)
+        else:
+            text = extract_text_from_file(temp_path, key_file.filename)
+            
         try:
             os.remove(temp_path)
         except:
@@ -254,7 +262,14 @@ def upload_files():
     if answer_file and allowed_file(answer_file.filename):
         temp_path = os.path.join(tempfile.gettempdir(), f"{uuid.uuid4()}_{answer_file.filename}")
         answer_file.save(temp_path)
-        text = extract_text_from_file(temp_path, answer_file.filename)
+        
+        # Check if it's an image for handwriting engine
+        ext = answer_file.filename.rsplit('.', 1)[1].lower()
+        if ext in ['jpg', 'jpeg', 'png']:
+            text = extract_handwriting(temp_path)
+        else:
+            text = extract_text_from_file(temp_path, answer_file.filename)
+            
         try:
             os.remove(temp_path)
         except:
@@ -280,11 +295,18 @@ def upload_single():
     file_type = request.form.get('type')  # 'answer' or 'key'
 
     if not file or not allowed_file(file.filename):
-        return jsonify({'status': 'error', 'message': 'Invalid file. Use PDF, DOCX, or TXT.'})
+        return jsonify({'status': 'error', 'message': 'Invalid file. Use PDF, DOCX, TXT, JPG, JPEG, or PNG.'})
 
     temp_path = os.path.join(tempfile.gettempdir(), f"{uuid.uuid4()}_{file.filename}")
     file.save(temp_path)
-    text = extract_text_from_file(temp_path, file.filename)
+    
+    # NEW: Determine which engine to use
+    ext = file.filename.rsplit('.', 1)[1].lower()
+    if ext in ['jpg', 'jpeg', 'png']:
+        text = extract_handwriting(temp_path)
+    else:
+        text = extract_text_from_file(temp_path, file.filename)
+        
     try:
         os.remove(temp_path)
     except:
