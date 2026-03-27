@@ -6,7 +6,7 @@ import json
 import uuid
 import copy
 
-from core.document_parser import extract_text_from_file
+from core.document_parser import extract_text_from_file, extract_image_via_gemini
 from core.llm_engine import grade_entire_exam
 from core.handwriting_engine import extract_handwriting
 
@@ -232,6 +232,9 @@ def upload_files():
     bundle_id = request.form.get('bundle_id')
     key_file = request.files.get('key_file')
     answer_file = request.files.get('answer_file')
+    
+    # Engine selection switch
+    engine_choice = request.form.get('ocr_engine', 'gemini')
 
     if not bundle_id:
         return jsonify({'status': 'error', 'message': 'No bundle ID provided.'})
@@ -248,7 +251,12 @@ def upload_files():
         # Check if it's an image for handwriting engine
         ext = key_file.filename.rsplit('.', 1)[1].lower()
         if ext in ['jpg', 'jpeg', 'png']:
-            text = extract_handwriting(temp_path)
+            if engine_choice == 'qwen':
+                print("Using Local Qwen-VL Engine...")
+                text = extract_handwriting(temp_path)
+            else:
+                print("Using Cloud Gemini Engine...")
+                text = extract_image_via_gemini(temp_path)
         else:
             text = extract_text_from_file(temp_path, key_file.filename)
             
@@ -266,7 +274,12 @@ def upload_files():
         # Check if it's an image for handwriting engine
         ext = answer_file.filename.rsplit('.', 1)[1].lower()
         if ext in ['jpg', 'jpeg', 'png']:
-            text = extract_handwriting(temp_path)
+            if engine_choice == 'qwen':
+                print("Using Local Qwen-VL Engine...")
+                text = extract_handwriting(temp_path)
+            else:
+                print("Using Cloud Gemini Engine...")
+                text = extract_image_via_gemini(temp_path)
         else:
             text = extract_text_from_file(temp_path, answer_file.filename)
             
@@ -293,6 +306,9 @@ def upload_single():
     bundle_id = request.form.get('bundle_id')
     student_id = request.form.get('student_id', '')
     file_type = request.form.get('type')  # 'answer' or 'key'
+    
+    # Engine selection switch
+    engine_choice = request.form.get('ocr_engine', 'gemini')
 
     if not file or not allowed_file(file.filename):
         return jsonify({'status': 'error', 'message': 'Invalid file. Use PDF, DOCX, TXT, JPG, JPEG, or PNG.'})
@@ -300,10 +316,14 @@ def upload_single():
     temp_path = os.path.join(tempfile.gettempdir(), f"{uuid.uuid4()}_{file.filename}")
     file.save(temp_path)
     
-    # NEW: Determine which engine to use
     ext = file.filename.rsplit('.', 1)[1].lower()
     if ext in ['jpg', 'jpeg', 'png']:
-        text = extract_handwriting(temp_path)
+        if engine_choice == 'qwen':
+            print("Using Local Qwen-VL Engine...")
+            text = extract_handwriting(temp_path)
+        else:
+            print("Using Cloud Gemini Engine...")
+            text = extract_image_via_gemini(temp_path)
     else:
         text = extract_text_from_file(temp_path, file.filename)
         

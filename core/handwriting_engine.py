@@ -1,4 +1,3 @@
-import gradio as gr
 from PIL import Image
 import json
 import cv2
@@ -6,7 +5,6 @@ import numpy as np
 from transformers import Qwen2VLForConditionalGeneration, AutoProcessor
 from qwen_vl_utils import process_vision_info
 import torch
-
 
 def deskew_image(pil_image):
     """Auto-rotate and deskew an image for better OCR."""
@@ -145,27 +143,16 @@ def ocr_and_search(image, keyword):
     return extracted_text, matched_sentences, json_output
 
 
-# Gradio App
-def app(image, keyword):
-    extracted_text, search_results, json_output = ocr_and_search(image, keyword)
-    search_results_str = "\n".join(search_results) if search_results else "No matches found."
-    return extracted_text, search_results_str, json_output
-
-
-# Gradio Interface
-iface = gr.Interface(
-    fn=app,
-    inputs=[
-        gr.Image(type="pil", label="Upload an Image"),
-        gr.Textbox(label="Enter keyword to search in extracted text", placeholder="Keyword"),
-    ],
-    outputs=[
-        gr.Textbox(label="Extracted Text"),
-        gr.Textbox(label="Search Results"),
-        gr.JSON(label="JSON Output"),
-    ],
-    title="OCR and Keyword Search — by aroky amatthew",
-)
-
-# Launch locally only
-iface.launch(server_name="127.0.0.1", share=False)
+def extract_handwriting(file_path):
+    """Silent helper for Flask to process an image via Qwen-VL."""
+    try:
+        # Load the image from the file path provided by Flask
+        image = Image.open(file_path)
+        
+        # We don't need the keyword search for grading, just the text
+        extracted_text, _, _ = ocr_and_search(image, keyword="")
+        
+        return extracted_text.strip()
+    except Exception as e:
+        print(f"Qwen-VL Error: {e}")
+        return f"[ERROR: Qwen-VL failed to read image - {str(e)}]"

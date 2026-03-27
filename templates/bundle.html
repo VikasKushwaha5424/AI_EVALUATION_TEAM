@@ -8,7 +8,6 @@
 </head>
 <body>
 
-    <!-- NAVBAR -->
     <nav class="main-navbar">
         <div style="display:flex;align-items:center;gap:20px;">
             <a href="/dashboard" class="navbar-brand">
@@ -23,7 +22,6 @@
         </div>
     </nav>
 
-    <!-- BUNDLE HEADER -->
     <div class="bundle-header">
         <div>
             <h2>{{ bundle.code }} — {{ bundle.name }}</h2>
@@ -32,26 +30,36 @@
         <a href="/dashboard" class="btn-back">← Back to Dashboard</a>
     </div>
 
-    <!-- UPLOAD SECTION -->
     <div class="upload-section">
         <h4>📤 Upload Documents for this Bundle</h4>
         <form id="uploadForm" enctype="multipart/form-data" style="margin:0;">
+            
             <div class="upload-row">
-                <div class="upload-group">
-                    <label>Answer Key / Evaluation Key (PDF, DOCX, TXT)</label>
-                    <input type="file" id="keyFile" accept=".pdf,.docx,.txt,.md,.json">
+                <div class="upload-group" style="max-width: 200px;">
+                    <label>Image OCR Engine</label>
+                    <select id="ocrEngine" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; background: white; font-size: 0.9rem;">
+                        <option value="gemini">☁️ Gemini (Cloud)</option>
+                        <option value="qwen">🖥️ Qwen-VL (Local)</option>
+                    </select>
                 </div>
+
                 <div class="upload-group">
-                    <label>Student Answer Sheet (PDF, DOCX, TXT)</label>
-                    <input type="file" id="answerFile" accept=".pdf,.docx,.txt,.md,.json">
+                    <label>Answer Key (PDF, DOCX, TXT, Image)</label>
+                    <input type="file" id="keyFile" accept=".pdf,.docx,.txt,.md,.json,.jpg,.jpeg,.png">
                 </div>
+                
+                <div class="upload-group">
+                    <label>Student Answer Sheet (PDF, DOCX, TXT, Image)</label>
+                    <input type="file" id="answerFile" accept=".pdf,.docx,.txt,.md,.json,.jpg,.jpeg,.png">
+                </div>
+                
                 <button type="button" class="btn-upload" onclick="uploadFiles()">📁 Upload Files</button>
             </div>
+            
             <div id="uploadStatus" style="margin-top:10px;font-size:0.82rem;font-weight:600;"></div>
         </form>
     </div>
 
-    <!-- STUDENTS TABLE -->
     <div class="students-table-wrapper">
         <table class="students-table">
             <thead>
@@ -100,6 +108,7 @@
             const statusDiv = document.getElementById('uploadStatus');
             const keyFile = document.getElementById('keyFile').files[0];
             const answerFile = document.getElementById('answerFile').files[0];
+            const ocrEngine = document.getElementById('ocrEngine').value; // Get Switch Value
 
             if (!keyFile && !answerFile) {
                 statusDiv.innerHTML = '<span style="color:#C62828;">⚠️ Please select at least one file to upload.</span>';
@@ -110,6 +119,7 @@
             if (keyFile) formData.append('key_file', keyFile);
             if (answerFile) formData.append('answer_file', answerFile);
             formData.append('bundle_id', '{{ bundle.id }}');
+            formData.append('ocr_engine', ocrEngine); // Send to backend
 
             statusDiv.innerHTML = '<span style="color:#1565C0;">⏳ Uploading files...</span>';
 

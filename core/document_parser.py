@@ -162,6 +162,34 @@ def extract_text_from_scanned_pdf_via_gemini(file_path):
                 pass
 
 
+def extract_image_via_gemini(file_path):
+    """Reads a single image using Gemini Vision."""
+    try:
+        from google import genai
+        from dotenv import load_dotenv
+        
+        load_dotenv()
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            return "[ERROR: No GEMINI_API_KEY found]"
+
+        client = genai.Client(api_key=api_key)
+        
+        with open(file_path, "rb") as f:
+            img_bytes = f.read()
+            
+        # Try primary model first
+        try:
+            return _call_gemini_vision(client, 'gemini-2.0-flash', img_bytes)
+        except Exception:
+            print("Gemini 2.0 failed, trying 1.5-flash...")
+            return _call_gemini_vision(client, 'gemini-1.5-flash', img_bytes)
+            
+    except Exception as e:
+        print(f"Gemini Image OCR Error: {e}")
+        return f"[ERROR: Gemini OCR failed - {str(e)}]"
+
+
 def extract_text_from_file(file_path, filename):
     """Reads raw text from PDF, DOCX, TXT, MD, or JSON files.
     For scanned/image PDFs: renders pages as images → sends to Gemini Vision for OCR."""

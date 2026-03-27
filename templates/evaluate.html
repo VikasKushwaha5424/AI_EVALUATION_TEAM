@@ -8,7 +8,6 @@
 </head>
 <body>
 
-    <!-- NAVBAR -->
     <nav class="main-navbar">
         <div style="display:flex;align-items:center;gap:20px;">
             <a href="/dashboard" class="navbar-brand">
@@ -25,7 +24,6 @@
         </div>
     </nav>
 
-    <!-- AI LOADING OVERLAY (hidden by default) -->
     <div id="aiLoading" class="ai-loading-overlay" style="display:none;">
         <div class="ai-loading-card">
             <div class="spinner"></div>
@@ -34,20 +32,23 @@
         </div>
     </div>
 
-    <!-- SPLIT SCREEN -->
     <div class="eval-container">
 
-        <!-- LEFT: Student Answer Sheet -->
         <div class="eval-left">
             <div class="eval-panel-header">
                 <h3>📄 Student's Answer Sheet</h3>
                 <span class="student-info">{{ student.name }} — {{ student.reg_no }}</span>
             </div>
 
-            <!-- Upload answer sheet if not present -->
             <div style="padding:10px 20px;background:#FFF;border-bottom:1px solid #E0E0E0;flex-shrink:0;">
                 <form id="answerUploadForm" style="display:flex;gap:10px;align-items:center;">
-                    <input type="file" id="studentAnswerFile" accept=".pdf,.docx,.txt,.md,.json" style="flex:1;font-size:0.82rem;">
+                    <input type="file" id="studentAnswerFile" accept=".pdf,.docx,.txt,.md,.json,.jpg,.jpeg,.png" style="flex:1;font-size:0.82rem;">
+                    
+                    <select id="answerOcrEngine" style="font-size:0.8rem; padding:6px; border-radius:4px; border: 1px solid #ccc;">
+                        <option value="gemini">☁️ Gemini</option>
+                        <option value="qwen">🖥️ Qwen</option>
+                    </select>
+
                     <button type="button" class="btn-upload" style="padding:8px 16px;font-size:0.8rem;" onclick="uploadStudentAnswer()">📤 Upload</button>
                 </form>
                 <div id="answerUploadStatus" style="font-size:0.78rem;margin-top:4px;"></div>
@@ -59,26 +60,29 @@
                 {% else %}
                 <div class="document-placeholder" id="studentDocPlaceholder">
                     <div class="placeholder-icon">📄</div>
-                    <p>No answer sheet uploaded yet.<br>Upload a PDF/DOCX above to view it here.</p>
+                    <p>No answer sheet uploaded yet.<br>Upload a PDF/DOCX/Image above to view it here.</p>
                 </div>
                 <div class="document-viewer" id="studentDocViewer" style="display:none;"></div>
                 {% endif %}
             </div>
         </div>
 
-        <!-- RIGHT: Key + Marks -->
         <div class="eval-right">
 
-            <!-- RIGHT TOP: Evaluation Key -->
             <div class="eval-right-top">
                 <div class="eval-panel-header">
                     <h3>🔑 Evaluation Key</h3>
                 </div>
 
-                <!-- Upload key if not present -->
                 <div style="padding:10px 20px;background:#FFF;border-bottom:1px solid #E0E0E0;">
                     <form id="keyUploadForm" style="display:flex;gap:10px;align-items:center;">
-                        <input type="file" id="evalKeyFile" accept=".pdf,.docx,.txt,.md,.json" style="flex:1;font-size:0.82rem;">
+                        <input type="file" id="evalKeyFile" accept=".pdf,.docx,.txt,.md,.json,.jpg,.jpeg,.png" style="flex:1;font-size:0.82rem;">
+                        
+                        <select id="keyOcrEngine" style="font-size:0.8rem; padding:6px; border-radius:4px; border: 1px solid #ccc;">
+                            <option value="gemini">☁️ Gemini</option>
+                            <option value="qwen">🖥️ Qwen</option>
+                        </select>
+
                         <button type="button" class="btn-upload" style="padding:8px 16px;font-size:0.8rem;" onclick="uploadEvalKey()">📤 Upload</button>
                     </form>
                     <div id="keyUploadStatus" style="font-size:0.78rem;margin-top:4px;"></div>
@@ -90,14 +94,13 @@
                     {% else %}
                     <div class="document-placeholder" id="keyDocPlaceholder">
                         <div class="placeholder-icon">🔑</div>
-                        <p>No evaluation key uploaded.<br>Upload a PDF/DOCX above.</p>
+                        <p>No evaluation key uploaded.<br>Upload a PDF/DOCX/Image above.</p>
                     </div>
                     <div class="document-viewer" id="keyDocViewer" style="display:none;"></div>
                     {% endif %}
                 </div>
             </div>
 
-            <!-- RIGHT BOTTOM: Marks Panel -->
             <div class="eval-right-bottom">
                 <div class="marks-panel">
                     <h3>📊 Marks & AI Evaluation</h3>
@@ -169,6 +172,8 @@
         async function uploadStudentAnswer() {
             const file = document.getElementById('studentAnswerFile').files[0];
             const status = document.getElementById('answerUploadStatus');
+            const ocrEngine = document.getElementById('answerOcrEngine').value;
+
             if (!file) { status.innerHTML = '<span style="color:#C62828;">Select a file first.</span>'; return; }
 
             const fd = new FormData();
@@ -176,6 +181,7 @@
             fd.append('bundle_id', bundleId);
             fd.append('student_id', studentId);
             fd.append('type', 'answer');
+            fd.append('ocr_engine', ocrEngine);
 
             status.innerHTML = '<span style="color:#1565C0;">⏳ Uploading...</span>';
             try {
@@ -198,12 +204,15 @@
         async function uploadEvalKey() {
             const file = document.getElementById('evalKeyFile').files[0];
             const status = document.getElementById('keyUploadStatus');
+            const ocrEngine = document.getElementById('keyOcrEngine').value;
+
             if (!file) { status.innerHTML = '<span style="color:#C62828;">Select a file first.</span>'; return; }
 
             const fd = new FormData();
             fd.append('file', file);
             fd.append('bundle_id', bundleId);
             fd.append('type', 'key');
+            fd.append('ocr_engine', ocrEngine);
 
             status.innerHTML = '<span style="color:#1565C0;">⏳ Uploading...</span>';
             try {
