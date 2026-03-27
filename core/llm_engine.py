@@ -4,7 +4,7 @@ import json
 from dotenv import load_dotenv
 
 # --- SECURITY IMPORT ---
-from security import gemini_limiter 
+from core.security import gemini_limiter
 
 load_dotenv()
 my_secret_key = os.getenv("GEMINI_API_KEY")
